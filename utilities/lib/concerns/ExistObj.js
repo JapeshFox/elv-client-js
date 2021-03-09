@@ -1,4 +1,5 @@
-// for scripts that work with an existing fabric object
+// For scripts that retrieve info from an existing fabric object
+// Also supports deleting the object
 
 const {ModOpt} = require("../options");
 
@@ -27,6 +28,9 @@ const New = context => {
 
   const versionList = async () => await context.concerns.ArgObjectId.objVersionList();
 
+  // ------------------
+  // instance interface
+  // ------------------
   return {
     argsProc,
     del,

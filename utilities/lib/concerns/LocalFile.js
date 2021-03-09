@@ -59,7 +59,15 @@ const New = context => {
     });
   };
 
-  return {add, callback, closeFileHandles, fileInfo};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    add,
+    callback,
+    closeFileHandles,
+    fileInfo
+  };
 };
 
 module.exports = {blueprint, New};

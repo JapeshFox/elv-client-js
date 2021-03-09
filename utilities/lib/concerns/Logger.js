@@ -198,7 +198,9 @@ const New = (context) => {
 
   const warnList  = (...args) => R.map(warn, args);
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     data,
     dataConcat,

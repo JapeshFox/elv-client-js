@@ -28,7 +28,9 @@ const New = context => {
 
   const libObjectList = async ({filterOptions} = {}) => await context.concerns.Library.objectList({filterOptions, libraryId: context.args.libraryId});
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     libCreateObject,
     libInfo,

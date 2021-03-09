@@ -49,6 +49,9 @@ const New = (context) => {
     str: stringOrFileContents(strOrPath, cwd, logger)
   });
 
+  // ------------------
+  // instance interface
+  // ------------------
   return {
     parse,
     parseFile,

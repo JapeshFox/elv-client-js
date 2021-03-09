@@ -46,7 +46,13 @@ const New = context => {
     }
   };
 
-  return {finalize, waitForPublish};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    finalize,
+    waitForPublish
+  };
 };
 
 module.exports = {

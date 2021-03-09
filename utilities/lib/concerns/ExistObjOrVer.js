@@ -64,6 +64,9 @@ const New = context => {
         objectId});
   };
 
+  // ------------------
+  // instance interface
+  // ------------------
   return {
     argsProc,
     libraryId,

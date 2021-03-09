@@ -63,7 +63,12 @@ const New = context => {
     );
   };
 
-  return {credentialSet};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    credentialSet
+  };
 };
 
 module.exports = {blueprint, New};

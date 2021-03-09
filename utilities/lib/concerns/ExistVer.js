@@ -27,6 +27,9 @@ const New = context => {
 
   const partList = async () => await context.concerns.ArgVersionHash.verPartList();
 
+  // ------------------
+  // instance interface
+  // ------------------
   return {
     argsProc,
     del,

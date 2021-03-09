@@ -86,8 +86,12 @@ const New = (context) => {
     return elvClient;
   };
 
+  // ------------------
   // instance interface
-  return {get};
+  // ------------------
+  return {
+    get
+  };
 };
 
 module.exports = {

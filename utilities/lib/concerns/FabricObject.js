@@ -80,7 +80,9 @@ const New = context => {
     return await context.concerns.Version.list({libraryId, objectId});
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     create,
     del,

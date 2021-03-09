@@ -44,7 +44,9 @@ const New = context => {
     };
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     create
   };

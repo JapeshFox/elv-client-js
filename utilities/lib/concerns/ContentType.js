@@ -39,7 +39,9 @@ const New = context => {
     return contentType.hash;
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     forItem,
     refToVersionHash

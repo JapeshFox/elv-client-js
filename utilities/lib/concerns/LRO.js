@@ -134,6 +134,9 @@ const New = context => {
     return summary;
   };
 
+  // ------------------
+  // instance interface
+  // ------------------
   return {
     status,
     statusMapProcess,

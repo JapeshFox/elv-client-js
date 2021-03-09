@@ -131,7 +131,16 @@ const New = context => {
     : context.args.s3Copy;
 
 
-  return {add, callback, credentialSet, fileInfo, isCopy};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    add,
+    callback,
+    credentialSet,
+    fileInfo,
+    isCopy
+  };
 };
 
 module.exports = {blueprint, New};

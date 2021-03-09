@@ -53,7 +53,9 @@ const New = (context) => {
     write({text: columnify(list, mergedOptions)});
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     write,
     writeJson,

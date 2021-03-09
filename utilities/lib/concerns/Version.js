@@ -66,6 +66,9 @@ const New = context => {
     return await context.concerns.Part.list({libraryId, objectId, versionHash});
   };
 
+  // ------------------
+  // instance interface
+  // ------------------
   return {
     decode,
     del,

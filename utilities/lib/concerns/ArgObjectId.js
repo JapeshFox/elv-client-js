@@ -72,7 +72,9 @@ const New = context => {
     });
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     argsProc,
     objDelete,

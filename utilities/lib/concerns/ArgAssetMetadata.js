@@ -135,7 +135,9 @@ const New = (context) => {
     return t;
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     displayTitle,
     ipTitleId,

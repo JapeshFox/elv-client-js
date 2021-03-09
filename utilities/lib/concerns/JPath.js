@@ -18,7 +18,12 @@ const New = context => {
   // convert --metadata argument to object (either literal JSON or @filePath)
   const match = ({pattern = jpathArg, metadata}) => JSON.jPath({pattern, metadata});
 
-  return {match};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    match
+  };
 };
 
 module.exports = {

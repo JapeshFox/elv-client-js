@@ -18,8 +18,12 @@ const New = context => {
 
   const typVersionHash = async () => await context.concerns.ContentType.refToVersionHash({typeRef: context.args.type});
 
+  // ------------------
   // instance interface
-  return {typVersionHash};
+  // ------------------
+  return {
+    typVersionHash
+  };
 };
 
 module.exports = {

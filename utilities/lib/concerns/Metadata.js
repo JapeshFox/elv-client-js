@@ -1,3 +1,5 @@
+// code related to handling metadata
+
 const kindOf = require("kind-of");
 const objectPath = require("object-path");
 const R = require("ramda");
@@ -119,17 +121,43 @@ const New = context => {
     });
   };
 
-  const write = async ({libraryId, metadata, noWait, objectId, writeToken}) => {
-    return await context.concerns.Edit.writeMetadata({
+  // TODO: param validation: validPath etc
+  // if writeToken passed in, don't finalize
+  // if writeToken not passed in, get one and finalize after
+  const write = async ({libraryId, metadata, metadataSubtree, noWait, objectId, writeToken}) => {
+    const writeTokenSupplied = kindOf(writeToken) === "string";
+    if(!writeTokenSupplied ) writeToken = await context.concerns.Edit.getWriteToken({libraryId, objectId});
+
+    logger.log("Writing metadata to object...");
+    const client = await context.concerns.Client.get();
+    await client.ReplaceMetadata({
       libraryId,
       metadata,
-      noWait,
+      metadataSubtree,
       objectId,
-      writeToken,
+      writeToken
     });
+
+    if(!writeTokenSupplied) {
+      // return latest version hash
+      return await context.concerns.Edit.finalize({
+        libraryId,
+        noWait,
+        objectId,
+        writeToken
+      });
+    }
   };
 
-  return {checkTargetPath, commitInfo, get, write};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    checkTargetPath,
+    commitInfo,
+    get,
+    write
+  };
 };
 
 module.exports = {

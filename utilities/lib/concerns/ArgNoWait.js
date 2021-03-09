@@ -38,7 +38,13 @@ const New = context => {
     }
   };
 
-  return {finalize, waitUnlessNo};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    finalize,
+    waitUnlessNo
+  };
 };
 
 module.exports = {

@@ -79,7 +79,15 @@ const New = context => {
     return reply.contents.map(x => ({objectId: x.id, latestHash: x.versions[0].hash, metadata: x.versions[0].meta}));
   };
 
-  return {forObject, info, list, objectList};
+  // ------------------
+  // instance interface
+  // ------------------
+  return {
+    forObject,
+    info,
+    list,
+    objectList
+  };
 };
 
 module.exports = {

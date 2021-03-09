@@ -25,7 +25,9 @@ const New = context => {
     });
   };
 
+  // ------------------
   // instance interface
+  // ------------------
   return {
     list
   };
