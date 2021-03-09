@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const ScriptBase = require("./parentClasses/ScriptBase");
+ScriptBase.deprecationNotice("ObjectSetPermission.js");
 
 class ObjectSetPermissions extends ScriptBase {
   async body() {
