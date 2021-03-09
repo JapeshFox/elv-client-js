@@ -9,33 +9,33 @@ const {argList2Params, removeElvEnvVars} = require("../helpers/params");
 removeElvEnvVars();
 beforeEach(removeStubs);
 
-const ListParts = require("../../ListParts");
+const ObjectListParts = require("../../ObjectListParts");
 
-describe("ListParts", () => {
+describe("ObjectListParts", () => {
 
   it("should complain if unrecognized option supplied", () => {
     expect(() => {
-      new ListParts(argList2Params("--objectId", "myObjId", "--illegalOption"));
+      new ObjectListParts(argList2Params("--objectId", "myObjId", "--illegalOption"));
     }).to.throw("Unknown argument: illegalOption");
   });
 
   it("should complain if --objectId and --versionHash missing", () => {
     expect(() => {
-      new ListParts(argList2Params());
+      new ObjectListParts(argList2Params());
     }).to.throw("Must supply either --objectId or --versionHash");
   });
 
   it("should not complain if --objectId or --versionHash supplied", () => {
     expect(() => {
-      new ListParts(argList2Params("--objectId", "myObjId"));
+      new ObjectListParts(argList2Params("--objectId", "myObjId"));
     }).to.not.throw();
     expect(() => {
-      new ListParts(argList2Params("--versionHash", "myHash"));
+      new ObjectListParts(argList2Params("--versionHash", "myHash"));
     }).to.not.throw();
   });
 
   it("should call ElvClient.ContentParts() and return list", () => {
-    const utility = new ListParts(argList2Params("--objectId", "iq__001xxx001xxxxxxxxxxxxxxxxxxx", "--json"));
+    const utility = new ObjectListParts(argList2Params("--objectId", "iq__USKPjhGXje6aGaqEN5VBjdH3n12", "--json"));
     const stub = stubClient(utility.concerns.Client);
     stub.resetHistory();
     return utility.run().then( (retVal) => {
@@ -43,6 +43,7 @@ describe("ListParts", () => {
       // console.log(JSON.stringify(retVal, null, 2));
       expect(stub.callHistoryMismatches([
         "ContentObjectLibraryId",
+        "ContentObject",
         "ContentParts"
       ]).length).to.equal(0);
     });

@@ -4,7 +4,7 @@ const Utility = require("./lib/Utility");
 const ExistObjOrVer = require("./lib/concerns/ExistObjOrVer");
 const ArgOutfile = require("./lib/concerns/ArgOutfile");
 
-class ListParts extends Utility {
+class ObjectListParts extends Utility {
   blueprint() {
     return {
       concerns: [ExistObjOrVer, ArgOutfile]
@@ -31,7 +31,7 @@ class ListParts extends Utility {
 }
 
 if(require.main === module) {
-  Utility.cmdLineInvoke(ListParts);
+  Utility.cmdLineInvoke(ObjectListParts);
 } else {
-  module.exports = ListParts;
+  module.exports = ObjectListParts;
 }

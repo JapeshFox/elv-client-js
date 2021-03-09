@@ -111,6 +111,11 @@ const CallBitcodeMethod = async (args) => {
   }
 };
 
+const ContentLibraries = async (args) => {
+  calls.push("ContentLibraries: " + JSON.stringify(args));
+  return Object.keys(libraries);
+};
+
 const ContentLibrary = async (args) => {
   calls.push("ContentLibrary: " + JSON.stringify(args));
   const {libraryId} = args;
@@ -126,11 +131,9 @@ const ContentLibrary = async (args) => {
   }
 };
 
-
 const ContentObject = async (args) => {
   calls.push("ContentObject: " + JSON.stringify(args));
-  // eslint-disable-next-line no-unused-vars
-  const {libraryId, objectId, versionHash} = args;
+  const {objectId} = args;
   if(objects.hasOwnProperty(objectId)) {
     const obj = objects[objectId];
     const ver = obj.versions[obj.versions.length - 1];
@@ -158,8 +161,7 @@ const ContentObjectLibraryId = async (args) => {
 
 const ContentObjectMetadata = async (args) => {
   calls.push("ContentObjectMetadata: " + JSON.stringify(args));
-  // eslint-disable-next-line no-unused-vars
-  const {libraryId, objectId, versionHash, writeToken} = args;
+  const {objectId} = args;
   if(objects.hasOwnProperty(objectId)) {
     const obj = objects[objectId];
     const ver = obj.versions[obj.versions.length - 1];
@@ -171,11 +173,6 @@ const ContentObjectMetadata = async (args) => {
   } else {
     throw Error(`Unable to find object ${objectId}`);
   }
-};
-
-const ContentLibraries = async (args) => {
-  calls.push("ContentLibraries: " + JSON.stringify(args));
-  return Object.keys(libraries);
 };
 
 const ContentObjects = async (args) => {
@@ -201,6 +198,30 @@ const ContentObjects = async (args) => {
 
   const {libraryId} = args;
   return {contents: libraries[libraryId].objects.map(contentObjectsReply(libraryId))};
+};
+
+const ContentObjectVersions = async (args) => {
+  calls.push("ContentObjectVersions: " + JSON.stringify(args));
+  const {objectId} = args;
+  if(objects.hasOwnProperty(objectId)) {
+    const obj = objects[objectId];
+    const ver = obj.versions;
+    const result = {
+      id: objectId,
+      versions: []
+    };
+    result.versions = ver.map((v) => {
+      return {
+        id: objectId,
+        hash: v.version_hash,
+        type: v.type,
+        qlib_id: obj.libraryId
+      };
+    });
+    return result;
+  } else {
+    throw Error(`Unable to find object ${objectId}`);
+  }
 };
 
 const ContentParts = async (args) => {
@@ -245,6 +266,51 @@ const CreateContentLibrary = async (args) => {
   return "ilib_dummy_new_lib";
 };
 
+const CreateContentObject = async (args) => {
+  calls.push("CreateContentObject: " + JSON.stringify(args));
+  const writeToken = "tqw_001";
+  const objectId = "iq__newDummyObject";
+  const versionHash = "hq__newDummyHash";
+
+  const draft =  {
+    metadata: {},
+    parts: [
+      {
+        part_hash: "hqp_001xxx002xxx001xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        size: 100
+      }
+    ],
+    type: ""
+  };
+
+  writeTokens[writeToken] = {objectId, versionHash, draft};
+
+  objects[objectId] = {
+    libraryId: args.libraryId,
+    versions: [
+      {
+        metadata: {public: {name: "mock generic object 001 version 001"}},
+        parts: [
+          {
+            part_hash: "hqp_001xxx001xxx001xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            size: 100
+          }
+        ],
+        type: "",
+        version_hash: versionHash
+      }
+    ]
+  };
+
+  return {
+    "id": objectId,
+    "write_token": writeToken,
+    "type": args.type || "",
+    "qlib_id": args.libraryId,
+    writeToken,
+    objectId
+  };
+};
 
 const CreateProductionMaster = async (args) => {
   calls.push("CreateProductionMaster: " + JSON.stringify(args));
@@ -320,10 +386,12 @@ const MockClient = {
   ContentObjectLibraryId,
   ContentObjectMetadata,
   ContentObjects,
+  ContentObjectVersions,
   ContentParts,
   ContentType,
   CreateABRMezzanine,
   CreateContentLibrary,
+  CreateContentObject,
   CreateProductionMaster,
   DeleteContentObject,
   EditContentObject,
