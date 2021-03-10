@@ -35,7 +35,7 @@ const New = context => {
 
   const libraryId = async () => await argsProc().libraryId;
 
-  const metadata = async ({subtree} = {}) => await context.concerns.ExistObj.objMetadata({subtree});
+  const metadata = async ({subtree} = {}) => await context.concerns.ExistObj.metadata({subtree});
 
   const metadataWrite =  async ({metadata, subtree, writeToken}) => {
     const {libraryId, noWait, objectId} = await argsProc();

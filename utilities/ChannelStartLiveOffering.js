@@ -6,17 +6,18 @@ const R = require("ramda");
 
 const Utility = require("./lib/Utility");
 
-const {NewOpt} = require("./lib/options");
+const {ModOpt, NewOpt} = require("./lib/options");
 const {PositiveInteger} = require("./lib/models/Models");
 
+const ArgOfferingKey = require("./lib/concerns/ArgOfferingKey");
 const Client = require("./lib/concerns/Client");
-const ExistObj = require("./lib/concerns/ExistObj");
+const ExistObjEdit = require("./lib/concerns/ExistObjEdit");
 const Metadata = require("./lib/concerns/Metadata");
 
 class ChannelStartLiveOffering extends Utility {
   blueprint() {
     return {
-      concerns: [Client, ExistObj, Metadata],
+      concerns: [ArgOfferingKey, Client, ExistObjEdit, Metadata],
       options: [
         NewOpt("delay",
           {
@@ -36,12 +37,7 @@ class ChannelStartLiveOffering extends Utility {
             descTemplate: "Number of segments to return in live media playlist",
             type: "number"
           }),
-        NewOpt("offeringKey",
-          {
-            default: "default",
-            descTemplate: "Which offering within channel to start",
-            type: "string"
-          })
+        ModOpt("offeringKey", {X: " within channel to start"})
       ]
     };
   }
@@ -51,10 +47,10 @@ class ChannelStartLiveOffering extends Utility {
 
     // operations that need to wait on network access
     // ----------------------------------------------------
-    const {delay, libraryId, objectId, offeringKey} = await this.concerns.ExistObj.argsProc();
+    const {delay, libraryId, objectId, offeringKey} = await this.concerns.ExistObjEdit.argsProc();
 
     logger.log("Retrieving existing metadata from object...");
-    const currentMetadata = await this.concerns.ExistObj.metadata();
+    const currentMetadata = await this.concerns.ExistObjEdit.metadata();
 
     if(!currentMetadata.channel) {
       throw Error("/channel not found in object metadata");
@@ -71,9 +67,11 @@ class ChannelStartLiveOffering extends Utility {
     if(!currentMetadata.channel.offerings[offeringKey].items) {
       throw Error(`/channel/offerings/${offeringKey}/items not found in object metadata`);
     }
+
     if(kindOf(currentMetadata.channel.offerings[offeringKey].items) !== "array") {
       throw Error(`/channel/offerings/${offeringKey}/items in object metadata is not an array`);
     }
+
     if(currentMetadata.channel.offerings[offeringKey].items.length === 0) {
       throw Error(`/channel/offerings/${offeringKey}/items in object metadata is empty`);
     }

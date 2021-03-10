@@ -8,23 +8,52 @@
 <script type="application/javascript">
 
   const playoutURLParseRegEx = /(^.+\/rep\/channel\/[^\/]+\/)([^\/]+)\//;
+  const playoutURLHashParseRegEx = /^.+\/([^\/]+)\/rep\/channel\/.+/;
   const videoSegURLParseRegEx = /^.+\/rep\/playout\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^?\/]+)/;
 
-  let curItemOrigOffKey = " "; // the offering key for the currently playing item (ignoring view switching)
-  let curValidViews = []; // the valid views for currently playing item
-  let selectedViewIndex = 0; // the currently selected view
+  // global vars
+  var authorization; // auth bearer token, extracted from playout URL query values
+  var channelOfferingURL; // playout URL, truncated after channel offering key
+  var curItemOrigOffKey; // the offering key for the currently playing item (ignoring view switching, i.e. pre-substitution)
+  var curValidViews; // the valid views for currently playing item
+  var hls; // HLS.js player instance
+  var multiview; // multiview info from the channel offering as a whole (consolidates info for all items in channel)
+  var playoutFormat; // extracted from playout URL, e.g. 'hls-clear'
+  var selectedViewIndex; // the currently selected view, defaults/resets to 0
+  var sid; // session ID, extracted from playout URL query values
+  var txtPlayoutURL; // the textbox containing playout URL
+  var viewButtons; // array of created buttons - DOM nodes
+  var viewControlsDiv; // container div for view control buttons
 
-  var authorization;
-  var channelOfferingURL;
-  var multiview;
-  var playoutFormat;
-  var sid;
-  var viewControlsDiv;
-  var viewButtons = [];
+  const initGlobals = () => {
+    // if currently playing, stop and remove
+    if(hls) {
+      hls.stopLoad();
+      hls.destroy();
+      hls = null;
+    }
+
+    curItemOrigOffKey = " "; // the offering key for the currently playing item (ignoring view switching)
+    curValidViews = []; // the valid views for currently playing item
+    selectedViewIndex = 0; // the currently selected view
+
+    authorization = null;
+    channelOfferingURL = null;
+    multiview = null;
+    playoutFormat = null;
+    sid = null;
+    txtPlayoutURL = document.getElementById("playoutURL");
+    viewControlsDiv = document.getElementById("viewControls");
+    if(viewButtons) {
+      viewButtons.forEach(b => viewControlsDiv.removeChild(b));
+    }
+    viewButtons = [];
+  };
 
   const playButtonPushed = () => {
     console.log("Play button pushed");
-    var playoutURL = document.getElementById("playoutURL").value;
+    initGlobals();
+    var playoutURL = txtPlayoutURL.value;
     console.log("playoutUrl: " + playoutURL);
 
     let match = playoutURLParseRegEx.exec(playoutURL);
@@ -48,7 +77,7 @@
       fetch(playoutURL)
         .then(response => {
           if(!response.ok) {
-            window.alert("error retrieving playlist");
+            window.alert("error retrieving playlist, make sure channel is currently playing");
           } else {
             fetch(channelOfferingOptionsURL())
               .then(optionsResponse => {
@@ -78,7 +107,6 @@
 
   const initViewControls = () => {
     console.log("creating view buttons");
-    viewControlsDiv = document.getElementById("viewControls");
     multiview.view_display_labels.forEach((labelString, index) => {
       const button = document.createElement("button");
       button.id = "b" + index;
@@ -98,7 +126,7 @@
   const startPlayout = (playoutURL) => {
     if(Hls.isSupported()) {
       var video = document.getElementById("video");
-      var hls = new Hls();
+      hls = new Hls();
       // bind them together
       hls.attachMedia(video);
       hls.on(Hls.Events.MEDIA_ATTACHED, function () {
@@ -109,6 +137,7 @@
             "manifest loaded, found " + data.levels.length + " quality level"
           );
           console.log("starting playout");
+          video.muted = document.getElementById("mute").checked;
           video.play();
         });
       });
@@ -150,6 +179,67 @@
     setTimeout(updateViewButtons, 3700);
   };
 
+  const updateUrlButtonClicked = () => {
+    var playoutURL = txtPlayoutURL.value;
+    if(playoutURL===""){
+      window.alert("Need URL to refresh!");
+      return;
+    }
+    const match = playoutURLHashParseRegEx.exec(playoutURL);
+    if(match) {
+      var oldHash = match[1];
+      console.log("hash in playout URL: " + oldHash);
+      // get latest hash
+      const urlObj = new URL(playoutURL);
+      urlObj.pathname = "/q/" + oldHash;
+      const contentObjectUrl = urlObj.toString();
+      console.log("making API call: " + contentObjectUrl);
+      fetch(contentObjectUrl)
+        .then(response => {
+          if(!response.ok) {
+            window.alert("error retrieving content object info for hash");
+          } else {
+            console.log("content object info retrieved for hash");
+            response.json()
+              .then(data => {
+                console.log("content object info parsed");
+                console.log(JSON.stringify(data,null,2));
+                const objId = data.id;
+                if (objId) {
+                  urlObj.pathname = "/q/" + objId;
+                  // repeat call, now with objectId
+                  fetch(urlObj.toString()).then(response => {
+                    if(!response.ok) {
+                      window.alert("error retrieving content object info for obj ID");
+                    } else {
+                      console.log("content object info retrieved for obj ID");
+                      response.json()
+                        .then(data => {
+                          console.log("content object info parsed");
+                          console.log(JSON.stringify(data,null,2));
+                          const latestHash = data.hash;
+                          if (latestHash) {
+                            const newPlayoutUrl = playoutURL.replace("/" + oldHash + "/", "/" + latestHash + "/");
+                            txtPlayoutURL.value = newPlayoutUrl;
+                          } else {
+                            window.alert("version hash not found in API call response");
+                          }
+                        });
+                    }
+                  });
+
+                } else {
+                  window.alert("object ID not found in API call response");
+                }
+              });
+
+          }
+        });
+    } else {
+      window.alert("Parsing URL failed");
+      return;
+    }
+  }
 
   const onViewButtonClick = (viewIndex) => {
     console.log(`View button clicked, viewIndex=${viewIndex}`);
@@ -195,35 +285,43 @@
               return (...args) => {
                 switch(name) {
                   case "open":
-                    // open request
-                    const match = videoSegURLParseRegEx.exec(args[1]);
-                    if(match) {
-                      console.log("video seg url detected");
-                      const streamKey = match[3];
-                      if(streamKey === "video") {
-                        const offeringKey = match[1];
-                        if(offeringKey !== curItemOrigOffKey) {
-                          onCurItemChange(offeringKey);
-                        }
+                    // call is to open ajax request
+                    try {
+                      const match = videoSegURLParseRegEx.exec(args[1]);
+                      if(match) {
+                        console.log("video seg url detected");
+                        const streamKey = match[3];
+                        if(streamKey === "video") {
+                          const offeringKey = match[1];
+                          if(offeringKey !== curItemOrigOffKey) {
+                            onCurItemChange(offeringKey);
+                          }
 
-                        // DISABLE SERVER-SIDE OFFERING KEY REPLACEMENT
-                        const urlObj = new URL(args[1]);
-                        urlObj.searchParams.delete("p");
-                        args[1] = urlObj.toString();
+                          // DISABLE SERVER-SIDE OFFERING KEY REPLACEMENT
+                          const urlObj = new URL(args[1]);
+                          urlObj.searchParams.delete("p");
+                          args[1] = urlObj.toString();
+                          console.log(`URL after deleting 'p=1': ${args[1]}`);
 
-                        if(selectedViewIndex !== 0) {
-                          // console.log(`selectedViewIndex=${selectedViewIndex}, curItemOrigOffKey=${curItemOrigOffKey}`);
-                          const availableViews = multiview.views_per_item[curItemOrigOffKey];
-                          // console.log(JSON.stringify(availableViews,null,2));
-                          const replacementView = availableViews.find(v => v.view === selectedViewIndex);
-                          // console.log(JSON.stringify(replacementView,null,2));
-                          if(replacementView && replacementView.offering_key) {
-                            const replacementOffKey = replacementView.offering_key;
-                            console.log(`>>>>>>   replacing /${curItemOrigOffKey}/ with /${replacementOffKey}/`);
-                            args[1] = args[1].replace("/" + curItemOrigOffKey + "/", "/" + replacementOffKey + "/");
+                          if(selectedViewIndex === 0){
+                            console.log(`selectedViewIndex=0, skipping URL offering key replacement`);
+                          } else {
+                            // console.log(`selectedViewIndex=${selectedViewIndex}, curItemOrigOffKey=${curItemOrigOffKey}`);
+                            const availableViews = multiview.views_per_item[curItemOrigOffKey];
+                            // console.log(JSON.stringify(availableViews,null,2));
+                            const replacementView = availableViews.find(v => v.view === selectedViewIndex);
+                            // console.log(JSON.stringify(replacementView,null,2));
+                            if(replacementView && replacementView.offering_key) {
+                              const replacementOffKey = replacementView.offering_key;
+                              console.log(`>>>>>>   replacing /${curItemOrigOffKey}/ with /${replacementOffKey}/`);
+                              args[1] = args[1].replace("/" + curItemOrigOffKey + "/", "/" + replacementOffKey + "/");
+                            }
                           }
                         }
                       }
+                    } catch(e) {
+                      console.log("ERROR during seg url processing");
+                      console.log(e);
                     }
                     break;
                   case "send":
@@ -260,10 +358,12 @@
 <div>
     <h1>Eluvio Live Channel Multiview Player</h1>
 </div>
-<div><label>Enter playout URL (with authorization and sid):</label></div>
+<div><label for="playoutURL">Enter playout URL (with authorization and sid):</label></div>
 <div><textarea id="playoutURL" style="width: 50%; height: 10em"></textarea></div>
 <div>
-    <button onclick="playButtonPushed()">Play!</button>
+    <button id="btnPlay" onclick="playButtonPushed()">Play!</button>
+    <label for="mute">&nbsp;Start muted: </label><input id="mute" type="checkbox" checked="true"></input>
+    <button id="btnUpdateUrl" onclick="updateUrlButtonClicked()">Refresh playout URL</button>
 </div>
 <hr/>
 <div id="viewControls">

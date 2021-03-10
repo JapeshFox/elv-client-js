@@ -2,8 +2,9 @@
 
 const Utility = require("./lib/Utility");
 
-const {NewOpt} = require("./lib/options");
+const {ModOpt} = require("./lib/options");
 
+const ArgOfferingKey = require("./lib/concerns/ArgOfferingKey");
 const Client = require("./lib/concerns/Client");
 const ExistObjOrVer = require("./lib/concerns/ExistObjOrVer");
 
@@ -11,13 +12,11 @@ const ExistObjOrVer = require("./lib/concerns/ExistObjOrVer");
 class ChannelGetLiveUrls extends Utility {
   blueprint() {
     return {
-      concerns: [Client, ExistObjOrVer],
+      concerns: [ArgOfferingKey, Client, ExistObjOrVer],
       options: [
-        NewOpt("offeringKey",
+        ModOpt("offeringKey",
           {
-            default: "default",
-            descTemplate: "Which offering within channel to get URLs for",
-            type: "string"
+            X: " within channel to get URLs for"
           })
       ]
     };

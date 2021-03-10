@@ -2,25 +2,17 @@
 
 const R = require("ramda");
 
-const {NewOpt} = require("./lib/options");
 const Utility = require("./lib/Utility");
 
+const ArgOfferingKey = require("./lib/concerns/ArgOfferingKey");
 const ExistObj = require("./lib/concerns/ExistObj");
 const Metadata = require("./lib/concerns/Metadata");
-
 
 class OfferingStartAsVaL extends Utility {
   blueprint() {
     return {
       concerns: [
-        ExistObj, Metadata
-      ],
-      options: [
-        NewOpt("offeringKey", {
-          default: "default",
-          descTemplate: "Name of offering.",
-          type: "string"
-        })
+        ArgOfferingKey, ExistObj, Metadata
       ]
     };
   }

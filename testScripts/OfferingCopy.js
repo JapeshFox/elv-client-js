@@ -3,6 +3,7 @@
 // Copies an offering from one offering key to another
 
 const ScriptOffering = require("./parentClasses/ScriptOffering");
+ScriptBase.deprecationNotice("OfferingCopy.js");
 
 class OfferingCopy extends ScriptOffering {
 

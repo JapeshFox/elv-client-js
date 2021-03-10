@@ -6,13 +6,13 @@ const {ModOpt, NewOpt} = require("./lib/options");
 
 const Utility = require("./lib/Utility");
 
-const ExistObj = require("./lib/concerns/ExistObj");
+const ExistObjEdit = require("./lib/concerns/ExistObjEdit");
 const Metadata = require("./lib/concerns/Metadata");
 
 class ObjectMoveMetadata extends Utility {
   blueprint() {
     return {
-      concerns: [ExistObj, Metadata],
+      concerns: [ExistObjEdit, Metadata],
       options: [
         ModOpt("objectId", {ofX: " item to modify"}),
         ModOpt("libraryId", {ofX: " object to modify"}),
@@ -41,8 +41,7 @@ class ObjectMoveMetadata extends Utility {
     Metadata.validatePathFormat({path: oldPath});
     Metadata.validatePathFormat({path: newPath});
 
-    const {libraryId, objectId} = await this.concerns.ExistObj.argsProc();
-    const currentMetadata = await this.concerns.ExistObj.metadata();
+    const currentMetadata = await this.concerns.ExistObjEdit.metadata();
 
     // check to make sure oldPath exists
     if(!Metadata.pathExists({
@@ -68,10 +67,8 @@ class ObjectMoveMetadata extends Utility {
     objectPath.set(revisedMetadata, Metadata.pathPieces({path: newPath}), valueToMove);
 
     // Write back metadata
-    const newHash = await this.concerns.Metadata.write({
-      libraryId,
-      metadata: revisedMetadata,
-      objectId
+    const newHash = await this.concerns.ExistObjEdit.metadataWrite({
+      metadata: revisedMetadata
     });
     this.logger.data("version_hash", newHash);
   }
