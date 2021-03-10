@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>Eluvio Live Channel Multiview Player</title>
+</head>
+
+<body>
+<script type="application/javascript">
+
+  const playoutURLParseRegEx = /(^.+\/rep\/channel\/[^\/]+\/)([^\/]+)\//;
+  const videoSegURLParseRegEx = /^.+\/rep\/playout\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^?\/]+)/;
+
+  let curItemOrigOffKey = " "; // the offering key for the currently playing item (ignoring view switching)
+  let curValidViews = []; // the valid views for currently playing item
+  let selectedViewIndex = 0; // the currently selected view
+
+  var authorization;
+  var channelOfferingURL;
+  var multiview;
+  var playoutFormat;
+  var sid;
+  var viewControlsDiv;
+  var viewButtons = [];
+
+  const playButtonPushed = () => {
+    console.log("Play button pushed");
+    var playoutURL = document.getElementById("playoutURL").value;
+    console.log("playoutUrl: " + playoutURL);
+
+    let match = playoutURLParseRegEx.exec(playoutURL);
+    if(match) {
+      channelOfferingURL = match[1];
+      console.log("channelOfferingURL: " + channelOfferingURL);
+      playoutFormat = match[2];
+      console.log("playoutFormat: " + playoutFormat);
+      var urlObj = new URL(playoutURL);
+      authorization = urlObj.searchParams.get("authorization");
+      console.log("authorization: " + authorization);
+      if(!authorization) {
+        window.alert("\"authorization=\" missing from url");
+      }
+      sid = urlObj.searchParams.get("sid");
+      if(!sid) {
+        window.alert("\"sid=\" missing from url");
+      }
+      console.log("sid: " + sid);
+
+      fetch(playoutURL)
+        .then(response => {
+          if(!response.ok) {
+            window.alert("error retrieving playlist");
+          } else {
+            fetch(channelOfferingOptionsURL())
+              .then(optionsResponse => {
+                console.log("options.json retrieved");
+                optionsResponse.json()
+                  .then(data => {
+                    console.log("options.json parsed");
+                    multiview = data[playoutFormat].properties.multiview;
+                    initViewControls();
+                    startPlayout(playoutURL);
+                    // console.log(JSON.stringify(data));
+                  });
+              });
+          }
+        });
+    } else {
+      window.alert("failed to parse url");
+    }
+  };
+
+  const channelOfferingOptionsURL = () => {
+    const optionsURL = new URL(channelOfferingURL + "options.json");
+    optionsURL.searchParams.set("authorization", authorization);
+    optionsURL.searchParams.set("sid", sid);
+    return optionsURL.toString();
+  };
+
+  const initViewControls = () => {
+    console.log("creating view buttons");
+    viewControlsDiv = document.getElementById("viewControls");
+    multiview.view_display_labels.forEach((labelString, index) => {
+      const button = document.createElement("button");
+      button.id = "b" + index;
+      button.type = "button";
+      button.innerText = labelString;
+
+      // create function with index in closure
+      button.onclick = () => {
+        onViewButtonClick(index);
+      };
+
+      viewControlsDiv.appendChild(button);
+      viewButtons.push(button);
+    });
+  };
+
+  const startPlayout = (playoutURL) => {
+    if(Hls.isSupported()) {
+      var video = document.getElementById("video");
+      var hls = new Hls();
+      // bind them together
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+        console.log("video and hls.js are now bound together !");
+        hls.loadSource(playoutURL);
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          console.log(
+            "manifest loaded, found " + data.levels.length + " quality level"
+          );
+          console.log("starting playout");
+          video.play();
+        });
+      });
+    }
+  };
+
+  const viewIndexCurrentlyValid = index => curValidViews.findIndex(v => v.view === index) >= 0;
+
+  const updateViewButtons = () => {
+    console.log("updating view buttons");
+    // hide switching message if visible
+    document.getElementById("switchmsg").hidden = true;
+    viewButtons.forEach((button, index) => {
+      if(viewIndexCurrentlyValid(index)) {
+        button.hidden = false;
+        // disable button for currently active view
+        button.disabled = selectedViewIndex === index;
+      } else {
+        button.hidden = true;
+        button.disabled = true;
+      }
+    });
+  };
+
+  //
+  // const mosaicClick = (event) => {
+  //   var posX = $(this).offset().left, posY = $(this).offset().top;
+  //   alert("event.pageX: " + event.pageX + " posX:" + posX + " event.pageY:" + event.pageY + " posY:" + posY);
+  // }
+
+  const tempDisableViewButtons = () => {
+    console.log("temporarily disabling view buttons");
+    viewButtons.forEach(button => {
+      button.disabled = true;
+      button.hidden = true;
+    });
+    // show switching message for 3700 ms then update buttons
+    document.getElementById("switchmsg").hidden = false;
+    setTimeout(updateViewButtons, 3700);
+  };
+
+
+  const onViewButtonClick = (viewIndex) => {
+    console.log(`View button clicked, viewIndex=${viewIndex}`);
+    if(viewIndex !== selectedViewIndex) {
+      console.log(`Changing active view, previous view index=${selectedViewIndex}`);
+      selectedViewIndex = viewIndex;
+      tempDisableViewButtons();
+    }
+  };
+
+
+  // =====================================================================================
+  // EVENT HANDLERS TRIGGERED BY OUTGOING URL REQUESTS
+  // =====================================================================================
+
+  const onCurItemChange = newItemOrigOffKey => {
+    console.log(`currently playing item changed from offering key ${curItemOrigOffKey} to ${newItemOrigOffKey}`);
+    curItemOrigOffKey = newItemOrigOffKey;
+    console.log("multiview.views_per_item=" + JSON.stringify(multiview.views_per_item, null, 2));
+    curValidViews = multiview.views_per_item[curItemOrigOffKey] || [];
+    console.log(`new valid view list for ${curItemOrigOffKey}: ` + JSON.stringify(curValidViews, null, 2));
+    if(!viewIndexCurrentlyValid(selectedViewIndex)) {
+      console.log(`previously selected view index ${selectedViewIndex} no longer valid, switching to 0`);
+      selectedViewIndex = 0;
+    }
+    updateViewButtons();
+  };
+
+  // =====================================================================================
+  // CREATE PROXY FOR XMLHttpRequest to monitor and modify outgoing requests
+  // =====================================================================================
+
+  const _Eluv_XMLHttpRequest = window.XMLHttpRequest;
+
+  const XMLHttpRequestClassHandler = {
+    construct: (target, args) => {
+      // console.log('XMLHttpRequestClassHandler constructor called ');
+      return new Proxy(
+        new _Eluv_XMLHttpRequest(),
+        {
+          get: (target, name, trap) => {
+            if(typeof target[name] === "function") {
+              return (...args) => {
+                switch(name) {
+                  case "open":
+                    // open request
+                    const match = videoSegURLParseRegEx.exec(args[1]);
+                    if(match) {
+                      console.log("video seg url detected");
+                      const streamKey = match[3];
+                      if(streamKey === "video") {
+                        const offeringKey = match[1];
+                        if(offeringKey !== curItemOrigOffKey) {
+                          onCurItemChange(offeringKey);
+                        }
+
+                        // DISABLE SERVER-SIDE OFFERING KEY REPLACEMENT
+                        const urlObj = new URL(args[1]);
+                        urlObj.searchParams.delete("p");
+                        args[1] = urlObj.toString();
+
+                        if(selectedViewIndex !== 0) {
+                          // console.log(`selectedViewIndex=${selectedViewIndex}, curItemOrigOffKey=${curItemOrigOffKey}`);
+                          const availableViews = multiview.views_per_item[curItemOrigOffKey];
+                          // console.log(JSON.stringify(availableViews,null,2));
+                          const replacementView = availableViews.find(v => v.view === selectedViewIndex);
+                          // console.log(JSON.stringify(replacementView,null,2));
+                          if(replacementView && replacementView.offering_key) {
+                            const replacementOffKey = replacementView.offering_key;
+                            console.log(`>>>>>>   replacing /${curItemOrigOffKey}/ with /${replacementOffKey}/`);
+                            args[1] = args[1].replace("/" + curItemOrigOffKey + "/", "/" + replacementOffKey + "/");
+                          }
+                        }
+                      }
+                    }
+                    break;
+                  case "send":
+                    // console.log(`send: ${args}`);
+                    break;
+                  case "abort":
+                    // console.log('abort')
+                    break;
+                  default:
+                    // console.log(name)
+                    break;
+                }
+                return target[name].apply(target, args);
+              };
+            }
+            return target[name];
+          },
+          set: (target, name, value) => {
+            // console.log(`set ${name}=${value}`);
+            target[name] = value;
+            return true;
+          }
+        }
+      );
+    }
+  };
+
+  window.XMLHttpRequest = new Proxy(_Eluv_XMLHttpRequest, XMLHttpRequestClassHandler);
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<div>
+    <h1>Eluvio Live Channel Multiview Player</h1>
+</div>
+<div><label>Enter playout URL (with authorization and sid):</label></div>
+<div><textarea id="playoutURL" style="width: 50%; height: 10em"></textarea></div>
+<div>
+    <button onclick="playButtonPushed()">Play!</button>
+</div>
+<hr/>
+<div id="viewControls">
+    <span hidden id="switchmsg">&nbsp;switching...</span>
+</div>
+<div>&nbsp;
+</div>
+<div>
+    <video height="400" id="video" controls></video>
+</div>
+
+</body>
+</html>
+
+
