@@ -776,10 +776,10 @@ exports.ContentPart = async function({libraryId, objectId, versionHash, partHash
  * @param {string} partHash - Hash of the part to download
  * @param {string=} format="arrayBuffer" - Format in which to return the data ("blob" | "arraybuffer" | "buffer)
  * @param {boolean=} chunked=false - If specified, part will be downloaded and decrypted in chunks. The
- * specified callback will be invoked on completion of each chunk. This is recommended for large files,
+ * specified callback will be invoked on completion of each chunk. This is recommended for large parts,
  * especially if they are encrypted.
- * @param {number=} chunkSize=1000000 - Size of file chunks to request for download
- * - NOTE: If the file is encrypted, the size of the chunks returned via the callback function will not be affected by this value
+ * @param {number=} chunkSize=1000000 - Size of part chunks to request for download
+ * - NOTE: If the part is encrypted, the size of the chunks returned via the callback function will not be affected by this value
  * @param {function=} callback - If specified, will be periodically called with current download status - Required if `chunked` is true
  * - Signature: ({bytesFinished, bytesTotal}) => {}
  * - Signature (chunked): ({bytesFinished, bytesTotal, chunk}) => {}
