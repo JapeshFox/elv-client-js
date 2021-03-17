@@ -5,7 +5,7 @@ const R = require("ramda");
 const {ModOpt, NewOpt} = require("./lib/options");
 const Utility = require("./lib/Utility");
 
-const ExistObj = require("./lib/concerns/ExistObj");
+const ExistObjEdit = require("./lib/concerns/ExistObjEdit");
 const Metadata = require("./lib/concerns/Metadata");
 const ArgMetadata = require("./lib/concerns/ArgMetadata");
 
@@ -13,12 +13,13 @@ class ObjectSetMetadata extends Utility {
   blueprint() {
     return {
       concerns: [
-        ExistObj,
+        ExistObjEdit,
         Metadata,
         ArgMetadata
       ],
       options: [
         NewOpt("path", {
+          default: "/",
           descTemplate: "Path within metadata to set (start with '/'). If omitted, all existing metadata will be replaced.",
           type: "string"
         }),
@@ -42,10 +43,8 @@ class ObjectSetMetadata extends Utility {
 
     // operations that may need to wait on network access
     // ----------------------------------------------------
-    const {libraryId, objectId} = await this.concerns.ExistObj.argsProc();
-
     logger.log("Retrieving existing metadata from object...");
-    const currentMetadata = await this.concerns.ExistObj.metadata();
+    const currentMetadata = await this.concerns.ExistObjEdit.metadata();
 
     // make sure targetPath does NOT exist, or --force specified
     this.concerns.Metadata.checkTargetPath({
@@ -58,12 +57,11 @@ class ObjectSetMetadata extends Utility {
     objectPath.set(revisedMetadata, Metadata.pathPieces({path}), metadataFromArg);
 
     // Write back metadata
-    const newHash = await this.concerns.Metadata.write({
-      libraryId,
-      metadata: revisedMetadata,
-      objectId
+    const newHash = await this.concerns.ExistObjEdit.metadataWrite({
+      metadata: revisedMetadata
     });
     this.logger.data("version_hash", newHash);
+    this.logger.log(`New version hash: ${newHash}`);
   }
 
   header() {

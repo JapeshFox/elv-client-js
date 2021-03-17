@@ -11,7 +11,7 @@ const Edit = require("./Edit");
 const JSON = require("./JSON");
 const Logger = require("./Logger");
 
-const pathRegex = /^(\/[^/]+)+$/;
+const pathRegex = /^\/([^/]+\/)*([^/]+)?$/;
 
 const pathDesc = path => path ? `path '${path}' ` : "";
 
@@ -30,7 +30,8 @@ const pathPieces = ({path}) => {
   let result = path.split("/");
   // remove empty string at beginning (should always be present)
   result.shift();
-  if(result.slice(-1)==="") result.pop();
+  // if path ended in '/', then remove empty path piece at end
+  if(R.equals(result.slice(-1),[""])) result.pop();
 
   return result.map(pathPieceCast);
 };
