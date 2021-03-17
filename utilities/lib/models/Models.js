@@ -5,6 +5,9 @@ const Result = require("crocks/Result");
 const {Err, Ok} = Result;
 const kindOf = require("kind-of");
 
+const RegExRFC3339 = /^\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}(?:%2E\d+)?[A-Z]?(?:[.-](?:08%3A\d{2}|\d{2}[A-Z]))?$/;
+const RegExRational = /^[0-9]+(\/[0-9]+)?$/;
+
 // Object Model basic and common derived types
 const Om = require("objectmodel");
 const Model = Om.Model;
@@ -43,7 +46,10 @@ const NonNegativeNumber = BasicModel(Number).assert(function isNonNegative(n) {
 const PositiveInteger = PositiveNumber.extend().assert(Number.isInteger).as("PositiveInteger");
 const NegativeInteger = NegativeNumber.extend().assert(Number.isInteger).as("NegativeInteger");
 const NonNegativeInteger = NonNegativeNumber.extend().assert(Number.isInteger).as("NonNegativeInteger");
-
+const RangeZeroToOneNumber = NonNegativeNumber.extend().assert(function betweenZeroAndOneInclusive(n) {
+  return n >= 0 && n <= 1;
+}).as("RangeZeroToOneNumber");
+  
 // Strings
 const NonBlankString = BasicModel(String).assert(function isNotBlank(str) {
   return kindOf(str) === "string" && str.trim().length > 0;
@@ -55,6 +61,10 @@ const TrimmedString = BasicModel(String).assert(function isTrimmed(str) {
   return str.trim() === str;
 }).as("TrimmedString");
 
+const RationalNumberString = BasicModel(String).assert(function isRational(str) {
+  return RegExRational.exec(str) !== null;
+}).as("RationalNumberString");
+
 // Dates
 const PastDate = BasicModel(Date).assert(function isInThePast(date) {
   return date.getTime() < Date.now();
@@ -62,6 +72,12 @@ const PastDate = BasicModel(Date).assert(function isInThePast(date) {
 const FutureDate = BasicModel(Date).assert(function isInTheFuture(date) {
   return date.getTime() > Date.now();
 }).as("FutureDate");
+
+// Timestamps
+
+const RFC3339_Timestamp = BasicModel(String).assert(function matchesRegex(str) {
+  return RegExRFC3339.exec(str) !== null;
+}).as("RFC3339_Timestamp");
 
 // Arrays
 const ArrayNotEmpty = BasicModel(Array).assert(function isNotEmpty(arr) {
@@ -194,6 +210,7 @@ module.exports = {
   Integer,
   SafeInteger,
   FiniteNumber,
+  RangeZeroToOneNumber,
   PositiveNumber,
   NegativeNumber,
   NonNegativeNumber,
@@ -203,8 +220,10 @@ module.exports = {
   NonBlankString,
   NormalizedString,
   TrimmedString,
+  RationalNumberString,
   PastDate,
   FutureDate,
+  RFC3339_Timestamp,
   ArrayNotEmpty,
   ArrayUnique,
   ArrayDense,
