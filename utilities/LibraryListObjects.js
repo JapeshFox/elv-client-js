@@ -17,23 +17,23 @@ class LibraryListObjects extends Utility {
       options: [
         ModOpt("libraryId", {demand: true}),
         NewOpt("filter", {
-          descTemplate: "JSON expression (or path to JSON file if starting with '@') to filter objects by (public) metadata",
+          descTemplate: `JSON expression (or path to JSON file if starting with '@') to filter objects by (public) metadata.\nExample for 'name contains FOO': --filter '{"key":"/public/name", "type":"cnt", "filter":"FOO"}'\nFor more info see https://eluv-io.github.io/elv-client-js/module-ElvClient_ContentAccess.html#.ContentObjects`,
           type: "string"
         }),
         NewOpt("date", {
-          descTemplate: "include latest commit date/time if available",
+          descTemplate: "Include latest commit date/time if available",
           type: "boolean"
         }),
         NewOpt("hash", {
-          descTemplate: "include latest version hash",
+          descTemplate: "Include latest version hash",
           type: "boolean"
         }),
         NewOpt("name", {
-          descTemplate: "include object name if available",
+          descTemplate: "Include object name if available",
           type: "boolean"
         }),
         NewOpt("size", {
-          descTemplate: "include object total size",
+          descTemplate: "Include object total size",
           type: "boolean"
         })
       ]
