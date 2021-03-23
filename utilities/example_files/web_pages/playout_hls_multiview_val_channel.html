@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>Eluvio Live Channel Multiview Player</title>
+    <title>Eluvio VoD-as-Live (VaL) Channel Multiview Player</title>
 </head>
 
 <body>
@@ -219,8 +219,7 @@
                           console.log(JSON.stringify(data,null,2));
                           const latestHash = data.hash;
                           if (latestHash) {
-                            const newPlayoutUrl = playoutURL.replace("/" + oldHash + "/", "/" + latestHash + "/");
-                            txtPlayoutURL.value = newPlayoutUrl;
+                            txtPlayoutURL.value = playoutURL.replace("/" + oldHash + "/", "/" + latestHash + "/");
                           } else {
                             window.alert("version hash not found in API call response");
                           }
@@ -237,7 +236,6 @@
         });
     } else {
       window.alert("Parsing URL failed");
-      return;
     }
   }
 
@@ -356,13 +354,13 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <div>
-    <h1>Eluvio Live Channel Multiview Player</h1>
+    <h1>Eluvio VoD-as-Live (VaL) Channel Multiview Player</h1>
 </div>
 <div><label for="playoutURL">Enter playout URL (with authorization and sid):</label></div>
 <div><textarea id="playoutURL" style="width: 50%; height: 10em"></textarea></div>
 <div>
     <button id="btnPlay" onclick="playButtonPushed()">Play!</button>
-    <label for="mute">&nbsp;Start muted: </label><input id="mute" type="checkbox" checked="true"></input>
+    <label for="mute">&nbsp;Start muted: </label><input id="mute" type="checkbox" checked="true"/>
     <button id="btnUpdateUrl" onclick="updateUrlButtonClicked()">Refresh playout URL</button>
 </div>
 <hr/>

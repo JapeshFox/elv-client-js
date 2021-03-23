@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<body onload="play()">
+
+<div>
+    <video height="400" id="video" controls></video>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="http://cdn.dashjs.org/latest/dash.all.min.js"></script>
+
+<script type="application/javascript">
+
+  const play = () => {
+
+    const hlsPlayoutURL = "YOUR_AUTHORIZED_HLS_PLAYOUT_URL";
+    const dashPlayoutURL = "YOUR_AUTHORIZED_DASH_PLAYOUT_URL";
+
+    var video = document.getElementById("video");
+
+    if(video.canPlayType('application/vnd.apple.mpegurl')) {
+      console.log('browser native media extensions playout');
+      video.src = hlsPlayoutURL;
+      video.play();
+    } else if(Hls.isSupported()) {
+      console.log('HLS.js playout');
+      hls = new Hls();
+      // bind them together
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+        hls.loadSource(hlsPlayoutURL);
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          video.play();
+        });
+      });
+    } else {
+      console.log('DASH.js playout');
+      var player = dashjs.MediaPlayer().create();
+      player.initialize(document.querySelector("#video"), dashPlayoutURL, true);
+      video.play();
+    }
+  }
+
+
+</script>
+
+</body>
+</html>
+
+

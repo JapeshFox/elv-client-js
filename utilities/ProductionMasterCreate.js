@@ -11,14 +11,14 @@ const ArgAssetMetadata = require("./lib/concerns/ArgAssetMetadata");
 const ArgMetadata = require("./lib/concerns/ArgMetadata");
 const ArgType = require("./lib/concerns/ArgType");
 const Client = require("./lib/concerns/Client");
-const CloudFile = require("./lib/concerns/CloudFile");
+const FileRemote = require("./lib/concerns/FileRemote");
 const ContentType = require("./lib/concerns/ContentType");
-const LocalFile = require("./lib/concerns/LocalFile");
+const FileLocal = require("./lib/concerns/FileLocal");
 
 class ProductionMasterCreate extends Utility {
   blueprint() {
     return {
-      concerns: [Client, CloudFile, LocalFile, ArgAssetMetadata, ArgMetadata, ContentType, ArgType],
+      concerns: [Client, FileRemote, FileLocal, ArgAssetMetadata, ArgMetadata, ContentType, ArgType],
       options: [
         StdOpt("libraryId",{demand: true, forX: "new production master"}),
         ModOpt("type",{demand: true, forX: "new production master"}),
@@ -40,7 +40,7 @@ class ProductionMasterCreate extends Utility {
 
     let access;
     if(this.args.s3Reference || this.args.s3Copy) {
-      access = this.concerns.CloudFile.credentialSet();
+      access = this.concerns.FileRemote.credentialSet();
     }
 
     const metadataFromArg = this.concerns.ArgMetadata.asObject() || {};
@@ -58,8 +58,8 @@ class ProductionMasterCreate extends Utility {
 
     let fileHandles = [];
     const fileInfo = access
-      ? this.concerns.CloudFile.fileInfo()
-      : this.concerns.LocalFile.fileInfo(fileHandles);
+      ? this.concerns.FileRemote.fileInfo()
+      : this.concerns.FileLocal.fileInfo(fileHandles);
 
     // delay getting elvClient until this point so script exits faster
     // if there is a validation error above
@@ -78,7 +78,7 @@ class ProductionMasterCreate extends Utility {
       encrypt,
       access,
       copy: s3Copy && !s3Reference,
-      callback: (access ? this.concerns.CloudFile : this.concerns.LocalFile).callback
+      callback: (access ? this.concerns.FileRemote : this.concerns.FileLocal).callback
     });
 
     const {errors, warnings, id} = createResponse;
@@ -89,7 +89,7 @@ class ProductionMasterCreate extends Utility {
     let hash = createResponse.hash;
 
     // Close file handles (if any)
-    this.concerns.LocalFile.closeFileHandles(fileHandles);
+    this.concerns.FileLocal.closeFileHandles(fileHandles);
 
     await client.SetVisibility({id, visibility: 0});
 

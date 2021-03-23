@@ -10,7 +10,7 @@ const Client = require("./Client");
 const Logger = require("./Logger");
 
 const blueprint = {
-  name: "LocalFile",
+  name: "FileLocal",
   concerns: [Logger, Client],
   options: [
     StdOpt("files", {demand: true}),

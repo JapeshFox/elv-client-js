@@ -40,6 +40,15 @@ class OfferingStartAsVaL extends Utility {
     logger.log("Retrieving existing metadata from object...");
     const currentMetadata = await this.concerns.ExistObj.metadata();
 
+    // complain if offerings not found
+    if(!currentMetadata.offerings) {
+      throw Error("/offerings not found in metadata");
+    }
+    // complain if specified offering not found
+    if(!currentMetadata.offerings[offeringKey]) {
+      throw Error(`Offering '${offeringKey}' not found`);
+    }
+
     const metadata = R.mergeDeepRight(currentMetadata, metadataToMerge);
 
     // Write back metadata

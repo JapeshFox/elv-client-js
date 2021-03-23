@@ -10,7 +10,7 @@ const ArgMetadata = require("./lib/concerns/ArgMetadata");
 const ArgObjectId = require("./lib/concerns/ArgObjectId");
 const ArgType = require("./lib/concerns/ArgType");
 const Client = require("./lib/concerns/Client");
-const CloudAccess = require("./lib/concerns/CloudAccess");
+const ArgCredentials = require("./lib/concerns/ArgCredentials");
 const ContentType = require("./lib/concerns/ContentType");
 const FabricObject = require("./lib/concerns/FabricObject");
 const Finalize = require("./lib/concerns/Finalize");
@@ -47,7 +47,7 @@ class MezzanineCreate extends Utility {
         ArgObjectId,
         ArgType,
         Client,
-        CloudAccess,
+        ArgCredentials,
         ContentType,
         FabricObject,
         Finalize,
@@ -106,7 +106,7 @@ class MezzanineCreate extends Utility {
 
     const metadataFromArg =  this.concerns.ArgMetadata.asObject() || {};
 
-    let access = this.concerns.CloudAccess.credentialSet(false);
+    let access = this.concerns.ArgCredentials.credentialSet(false);
 
     // operations that may need to wait on network access
     // ----------------------------------------------------

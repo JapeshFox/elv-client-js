@@ -7,13 +7,13 @@ const {valOrThrow} = require("../../../lib/helpers");
 const {EmptyWidgetData} = require("../../../lib/models/WidgetData");
 
 const options = require("../../../lib/options");
-const CloudFile = require("../../../lib/concerns/CloudFile");
+const FileRemote = require("../../../lib/concerns/FileRemote");
 
 describe("fConcernsReducer", () => {
 
   it("should return non-empty checksMap when given a concern that has checksMap", () => {
     const rAccWidget = Ok(EmptyWidgetData());
-    const rResultWidget = options.fConcernsReducer(rAccWidget, CloudFile);
+    const rResultWidget = options.fConcernsReducer(rAccWidget, FileRemote);
     const widget = valOrThrow(rResultWidget);
     const checksMap = widget.checksMap;
     expect(checksMap).to.not.be.empty;

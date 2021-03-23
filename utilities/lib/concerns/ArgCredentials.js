@@ -4,7 +4,7 @@ const {NewOpt} = require("../options");
 const JSON = require("./JSON");
 
 const blueprint = {
-  name: "CloudAccess",
+  name: "ArgCredentials",
   concerns: [JSON],
   options: [
     NewOpt("credentials", {

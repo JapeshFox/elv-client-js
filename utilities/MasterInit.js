@@ -9,7 +9,7 @@ const {ModOpt} = require("./lib/options");
 const Utility = require("./lib/Utility");
 
 const Client = require("./lib/concerns/Client");
-const CloudAccess = require("./lib/concerns/CloudAccess");
+const ArgCredentials = require("./lib/concerns/ArgCredentials");
 const ArgObjectId = require("./lib/concerns/ArgObjectId");
 const Metadata = require("./lib/concerns/Metadata");
 const Edit = require("./lib/concerns/Edit");
@@ -17,7 +17,7 @@ const Edit = require("./lib/concerns/Edit");
 class MasterInit extends Utility {
   blueprint() {
     return {
-      concerns: [ArgObjectId, CloudAccess, Client, Edit, Metadata],
+      concerns: [ArgObjectId, ArgCredentials, Client, Edit, Metadata],
       options: [
         ModOpt("objectId", {demand: true})
       ]
@@ -25,7 +25,7 @@ class MasterInit extends Utility {
   }
 
   async body() {
-    const access = this.concerns.CloudAccess.credentialSet(false);
+    const access = this.concerns.ArgCredentials.credentialSet(false);
 
     await this.concerns.ArgObjectId.argsProc();
     const {objectId, libraryId} = this.args;

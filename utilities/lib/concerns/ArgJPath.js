@@ -3,7 +3,7 @@ const {NewOpt} = require("../options");
 const JSON = require("./JSON");
 
 const blueprint = {
-  name: "JPath",
+  name: "ArgJPath",
   options: [
     NewOpt("jpath", {
       descTemplate: "JSON Path expression{X} (see https://www.npmjs.com/package/jsonpath-plus for examples).",

@@ -5,15 +5,15 @@ const Utility = require("./lib/Utility");
 
 const ArgNoWait = require("./lib/concerns/ArgNoWait");
 const ExistObj = require("./lib/concerns/ExistObj");
-const CloudFile = require("./lib/concerns/CloudFile");
+const FileRemote = require("./lib/concerns/FileRemote");
 const Edit = require("./lib/concerns/Edit");
-const LocalFile = require("./lib/concerns/LocalFile");
+const FileLocal = require("./lib/concerns/FileLocal");
 const Logger = require("./lib/concerns/Logger");
 
 class ObjectAddFiles extends Utility {
   blueprint() {
     return {
-      concerns: [Logger, ExistObj, Edit, ArgNoWait, LocalFile, CloudFile],
+      concerns: [Logger, ExistObj, Edit, ArgNoWait, FileLocal, FileRemote],
       options: [
         ModOpt("files", {X: "to add"}),
         StdOpt("encrypt", {X: "uploaded files"})
@@ -26,12 +26,12 @@ class ObjectAddFiles extends Utility {
     const {encrypt, noWait} = this.args;
 
     let access;
-    if(this.args.s3Reference || this.args.s3Copy) access = this.concerns.CloudFile.credentialSet();
+    if(this.args.s3Reference || this.args.s3Copy) access = this.concerns.FileRemote.credentialSet();
 
     let fileHandles = [];
     const fileInfo = access
-      ? this.concerns.CloudFile.fileInfo()
-      : this.concerns.LocalFile.fileInfo(fileHandles);
+      ? this.concerns.FileRemote.fileInfo()
+      : this.concerns.FileLocal.fileInfo(fileHandles);
 
     const {libraryId, objectId} = await this.concerns.ExistObj.argsProc();
 
@@ -41,7 +41,7 @@ class ObjectAddFiles extends Utility {
     });
 
     if(access) {
-      await this.concerns.CloudFile.add({
+      await this.concerns.FileRemote.add({
         libraryId,
         objectId,
         writeToken,
@@ -50,7 +50,7 @@ class ObjectAddFiles extends Utility {
         encrypt
       });
     } else {
-      await this.concerns.LocalFile.add({
+      await this.concerns.FileLocal.add({
         libraryId,
         objectId,
         writeToken,
@@ -58,7 +58,7 @@ class ObjectAddFiles extends Utility {
         encrypt
       });
       // Close file handles
-      this.concerns.LocalFile.closeFileHandles(fileHandles);
+      this.concerns.FileLocal.closeFileHandles(fileHandles);
     }
 
     const hash = await this.concerns.Edit.finalize({

@@ -20,6 +20,59 @@
         }
       ]
     },
+    "{\"media_type\":\"video\",\"aspect_ratio_height\":135,\"aspect_ratio_width\":256}": {
+      "rung_specs": [
+        {
+          "bit_rate": 20000000,
+          "height": 2160,
+          "media_type": "video",
+          "pregenerate": true,
+          "width": 4096
+        },
+        {
+          "bit_rate": 9500000,
+          "height": 1080,
+          "media_type": "video",
+          "pregenerate": false,
+          "width": 2048
+        },
+        {
+          "bit_rate": 4500000,
+          "height": 720,
+          "media_type": "video",
+          "pregenerate": false,
+          "width": 1364
+        },
+        {
+          "bit_rate": 2000000,
+          "height": 540,
+          "media_type": "video",
+          "pregenerate": false,
+          "width": 1024
+        },
+        {
+          "bit_rate": 1100000,
+          "height": 432,
+          "media_type": "video",
+          "pregenerate": false,
+          "width": 820
+        },
+        {
+          "bit_rate": 810000,
+          "height": 360,
+          "media_type": "video",
+          "pregenerate": false,
+          "width": 682
+        },
+        {
+          "bit_rate": 520000,
+          "height": 360,
+          "media_type": "video",
+          "pregenerate": false,
+          "width": 682
+        }
+      ]
+    },
     "{\"media_type\":\"video\",\"aspect_ratio_height\":9,\"aspect_ratio_width\":16}": {
       "rung_specs": [
         {

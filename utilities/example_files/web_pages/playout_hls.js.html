@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>Eluvio Playout - HLS.js</title>
+</head>
+
+<body>
+
+<div>
+    <h1>Eluvio Playout - HLS.js</h1>
+</div>
+<div><label for="playoutURL">Enter playout URL:</label></div>
+<div><textarea id="playoutURL" style="width: 50%; height: 10em"></textarea></div>
+<div>
+    <button id="btnPlay" onclick="playButtonPushed()">Play!</button>
+</div>
+<div>
+    <video height="400" id="video" controls></video>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script type="application/javascript">
+
+  const playButtonPushed = () => {
+    startPlayout(document.getElementById("playoutURL").value);
+  }
+
+  const startPlayout = (playoutURL) => {
+    if(Hls.isSupported()) {
+      var video = document.getElementById("video");
+      hls = new Hls();
+      // bind them together
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+        // console.log("video and hls.js are now bound together !");
+        hls.loadSource(playoutURL);
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          // console.log("manifest loaded, found " + data.levels.length + " quality level");
+          // console.log("starting playout");
+          video.play();
+        });
+      });
+    } else {
+      window.alert("HLS.js not supported");
+    }
+  };
+
+</script>
+
+</body>
+</html>
+
+

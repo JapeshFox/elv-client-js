@@ -4,7 +4,7 @@ const kindOf = require("kind-of");
 const {ModOpt, NewOpt} = require("./lib/options");
 const Utility = require("./lib/Utility");
 
-const JPath = require("./lib/concerns/JPath");
+const ArgJPath = require("./lib/concerns/ArgJPath");
 const Metadata = require("./lib/concerns/Metadata");
 const ExistObjOrVer = require("./lib/concerns/ExistObjOrVer");
 const ArgOutfile = require("./lib/concerns/ArgOutfile");
@@ -12,7 +12,7 @@ const ArgOutfile = require("./lib/concerns/ArgOutfile");
 class ObjectGetMetadata extends Utility {
   blueprint() {
     return {
-      concerns: [JPath, ExistObjOrVer, ArgOutfile],
+      concerns: [ArgJPath, ExistObjOrVer, ArgOutfile],
       options: [
         ModOpt("jpath", {X: "to extract"}),
         NewOpt("subtree", {
@@ -36,7 +36,7 @@ class ObjectGetMetadata extends Utility {
     const metadata = await this.concerns.ExistObjOrVer.metadata({subtree});
     if(kindOf(metadata) === "undefined") throw Error("no metadata found");
     const filteredMetadata = this.args.jpath
-      ? this.concerns.JPath.match({metadata})
+      ? this.concerns.ArgJPath.match({metadata})
       : metadata;
     if(kindOf(filteredMetadata) === "undefined") throw Error("no metadata matched --jpath filter");
 

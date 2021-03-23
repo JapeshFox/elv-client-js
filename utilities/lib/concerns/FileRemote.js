@@ -8,7 +8,7 @@ const {removeTrailingSlash, throwError} = require("../helpers");
 const {StdOpt, NewOpt} = require("../options");
 
 const Client = require("./Client");
-const CloudAccess = require("./CloudAccess");
+const ArgCredentials = require("./ArgCredentials");
 const Logger = require("./Logger");
 
 const s3BucketRegex = /^s3:\/\/([^/]+)\//i; // for matching and extracting bucket name when full s3:// path is specified
@@ -55,8 +55,8 @@ const validatePathMatchGroups = (access, groupedFiles) => {
 };
 
 const blueprint = {
-  name: "CloudFile",
-  concerns: [Logger, CloudAccess, Client],
+  name: "FileRemote",
+  concerns: [Logger, ArgCredentials, Client],
   options: [
     StdOpt("files", {demand: true}),
     NewOpt("s3Copy", {
@@ -77,7 +77,7 @@ const blueprint = {
 
 const New = context => {
 
-  const credentialSet = context.concerns.CloudAccess.credentialSet;
+  const credentialSet = context.concerns.ArgCredentials.credentialSet;
   const callback = context.concerns.Logger.log;
 
   const fileInfo = (files) => {

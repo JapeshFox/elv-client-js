@@ -9,7 +9,7 @@ const Client = require("./lib/concerns/Client");
 const ExistObjOrVer = require("./lib/concerns/ExistObjOrVer");
 
 
-class ChannelGetLiveUrls extends Utility {
+class ChannelGetVodUrls extends Utility {
   blueprint() {
     return {
       concerns: [ArgOfferingKey, Client, ExistObjOrVer],
@@ -37,7 +37,11 @@ class ChannelGetLiveUrls extends Utility {
     if(!offerings[offeringKey]) {
       throw Error(`Offering '${offeringKey}' not found in channel`);
     }
-    
+
+    if(offerings[offeringKey].playout_type !== "ch_vod") {
+      throw Error(`Offering '${offeringKey}' is not a VoD offering`);
+    }
+
     const client = await this.concerns.Client.get();
     const url = await client.FabricUrl({
       libraryId,
@@ -93,43 +97,15 @@ class ChannelGetLiveUrls extends Utility {
       logger.log();
       logger.log(playoutUrl.toString());
     }
-
-    const viewsUrl = await client.FabricUrl({
-      libraryId,
-      objectId,
-      versionHash,
-      rep: `channel/${offeringKey}/views.json`
-    });
-    const viewsUrlObj = new URL(viewsUrl);
-    viewsUrlObj.searchParams.set("sid", sid);
-    logger.log();
-    logger.log(`Sample offering '${offeringKey}' current available views URL (sid must be same as in playout URL):`);
-    logger.log();
-    logger.log(viewsUrlObj.toString());
-
-
-    const selectViewUrl = await client.FabricUrl({
-      libraryId,
-      objectId,
-      versionHash,
-      rep: `channel/${offeringKey}/select_view`
-    });
-    const viewSelectUrlObj = new URL(selectViewUrl);
-    viewSelectUrlObj.searchParams.set("sid", sid);
-
-    logger.log();
-    logger.log("Sample curl command to select view (sid must be same as in playout URL):");
-    logger.log();
-    logger.log(`curl -X POST '${viewSelectUrlObj.toString()}' -d '{"view":1}'`);
   }
 
   header() {
-    return `Start playout of 'live' channel object ${this.args.objectId}${this.args.delay ? ` with ${this.args.delay} second(s) delay` : ""}`;
+    return `Get VoD channel object sample URLs for offering ${this.args.offeringKey} in ${this.args.objectId}`;
   }
 }
 
 if(require.main === module) {
-  Utility.cmdLineInvoke(ChannelGetLiveUrls);
+  Utility.cmdLineInvoke(ChannelGetVodUrls);
 } else {
-  module.exports = ChannelGetLiveUrls;
+  module.exports = ChannelGetVodUrls;
 }

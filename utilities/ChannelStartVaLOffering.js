@@ -14,7 +14,7 @@ const Client = require("./lib/concerns/Client");
 const ExistObjEdit = require("./lib/concerns/ExistObjEdit");
 const Metadata = require("./lib/concerns/Metadata");
 
-class ChannelStartLiveOffering extends Utility {
+class ChannelStartVaLOffering extends Utility {
   blueprint() {
     return {
       concerns: [ArgOfferingKey, Client, ExistObjEdit, Metadata],
@@ -74,6 +74,10 @@ class ChannelStartLiveOffering extends Utility {
 
     if(currentMetadata.channel.offerings[offeringKey].items.length === 0) {
       throw Error(`/channel/offerings/${offeringKey}/items in object metadata is empty`);
+    }
+
+    if(offerings[offeringKey].playout_type !== "ch_val") {
+      throw Error(`Offering '${offeringKey}' is not a VoD-as-Live (VaL) offering`);
     }
 
     const totalDur = currentMetadata.channel.offerings[offeringKey].items.reduce(
@@ -203,7 +207,7 @@ class ChannelStartLiveOffering extends Utility {
 }
 
 if(require.main === module) {
-  Utility.cmdLineInvoke(ChannelStartLiveOffering);
+  Utility.cmdLineInvoke(ChannelStartVaLOffering);
 } else {
-  module.exports = ChannelStartLiveOffering;
+  module.exports = ChannelStartVaLOffering;
 }

@@ -35,17 +35,17 @@ const callHistoryMismatches = list => {
   for(let i = 0; i < list.length; i++) {
     const matchString = list[i];
     const callDesc = (history.length > i ? history[i] : "");
-    if(!callDesc.includes(matchString)) result.push(`mismatch on call #${i+1}, ${matchString} not found in ${callDesc}`);
+    if(!callDesc.includes(matchString)) result.push(`mismatch on call #${i + 1}, ${matchString} not found in ${callDesc}`);
   }
   if(history.length > list.length) {
     for(let i = list.length; i < history.length; i++) {
-      result.push(`Unexpected call #${i+1}, ${history[i]}`);
+      result.push(`Unexpected call #${i + 1}, ${history[i]}`);
     }
   }
 
-  if(result.length > 0){
+  if(result.length > 0) {
     // eslint-disable-next-line no-console
-    console.warn(JSON.stringify(result,null,2));
+    console.warn(JSON.stringify(result, null, 2));
   }
   return result;
 };
@@ -272,7 +272,7 @@ const CreateContentObject = async (args) => {
   const objectId = "iq__newDummyObject";
   const versionHash = "hq__newDummyHash";
 
-  const draft =  {
+  const draft = {
     metadata: {},
     parts: [
       {
@@ -414,15 +414,23 @@ const Stub = {
 // ==========================================
 
 const libraries = {
+  // master
   ilib001xxxxxxxxxxxxxxxxxxxxxxxx: {
     contractMetadata: {},
     qid: "iq__001xxxxxxxxxxxxxxxxxxxxxxxx",
     objects: ["iq__001xxx001xxxxxxxxxxxxxxxxxxx"]
   },
+  // space - holds content types
   ilib002xxxxxxxxxxxxxxxxxxxxxxxx: {
     contractMetadata: {},
     qid: "iq__002xxxxxxxxxxxxxxxxxxxxxxxx",
     objects: ["iq__002xxx001xxxxxxxxxxxxxxxxxxx"]
+  },
+  // mez
+  ilib003xxxxxxxxxxxxxxxxxxxxxxxx: {
+    contractMetadata: {},
+    qid: "iq__003xxxxxxxxxxxxxxxxxxxxxxxx",
+    objects: ["iq__003xxx001xxxxxxxxxxxxxxxxxxx"]
   }
 };
 
@@ -442,7 +450,8 @@ const objects = {
               }
             }
           },
-          public: {name: "mock master object for hash hq__6VrSGdAq5cwtzdueW35LukHXfXj2U7tsKNK3xBgVKZ6JewmtaHARFzWRZv8kL2SyEdjuFwi8U4"}},
+          public: {name: "mock master object for hash hq__6VrSGdAq5cwtzdueW35LukHXfXj2U7tsKNK3xBgVKZ6JewmtaHARFzWRZv8kL2SyEdjuFwi8U4"}
+        },
         parts: [
           {
             part_hash: "hqp_001xxx002xxx001xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -507,7 +516,8 @@ const objects = {
               }
             }
           },
-          public: {name: "mock master object 002 version 001"}},
+          public: {name: "mock master object 002 version 001"}
+        },
         parts: [
           {
             part_hash: "hqp_001xxx002xxx001xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -563,12 +573,38 @@ const objects = {
         version_hash: "hq__002xxx002xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       }
     ]
+  },
+  iq__003xxx001xxxxxxxxxxxxxxxxxxx: {
+    libraryId: "ilib003xxxxxxxxxxxxxxxxxxxxxxxx",
+    versions: [
+      {
+        metadata: {
+          offerings: {
+            default: {
+              media_struct: {
+                streams: {
+                  audio: {},
+                  video: {}
+                },
+              }
+            }
+          },
+          public: {name: "mock master object 002 version 001"}
+        },
+        parts: [
+          {
+            part_hash: "hqp_001xxx002xxx001xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            size: 100
+          }
+        ],
+        type: "",
+        version_hash: "hq__001xxx002xxx001xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    ]
   }
 };
 
 const writeTokens = {};
-
-
 
 
 module.exports = {removeStubs, stubClient};
