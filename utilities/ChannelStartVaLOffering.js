@@ -76,7 +76,7 @@ class ChannelStartVaLOffering extends Utility {
       throw Error(`/channel/offerings/${offeringKey}/items in object metadata is empty`);
     }
 
-    if(offerings[offeringKey].playout_type !== "ch_val") {
+    if(currentMetadata.channel.offerings[offeringKey].playout_type !== "ch_val") {
       throw Error(`Offering '${offeringKey}' is not a VoD-as-Live (VaL) offering`);
     }
 
@@ -100,8 +100,7 @@ class ChannelStartVaLOffering extends Utility {
             live_end_time: endTimeISO,
             live_end_tol: liveEndTol,
             live_seg_count: liveSegCount,
-            live_start_time: startTimeISO,
-            playout_type: "ch_live"
+            live_start_time: startTimeISO
           }
         }
       }

@@ -9,7 +9,7 @@ const Client = require("./lib/concerns/Client");
 const ExistObjOrVer = require("./lib/concerns/ExistObjOrVer");
 
 
-class ChannelGetVodUrls extends Utility {
+class ChannelGetVoDUrls extends Utility {
   blueprint() {
     return {
       concerns: [ArgOfferingKey, Client, ExistObjOrVer],
@@ -105,7 +105,7 @@ class ChannelGetVodUrls extends Utility {
 }
 
 if(require.main === module) {
-  Utility.cmdLineInvoke(ChannelGetVodUrls);
+  Utility.cmdLineInvoke(ChannelGetVoDUrls);
 } else {
-  module.exports = ChannelGetVodUrls;
+  module.exports = ChannelGetVoDUrls;
 }
