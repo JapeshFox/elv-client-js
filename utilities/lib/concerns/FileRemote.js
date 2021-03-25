@@ -3,7 +3,8 @@ const path = require("path");
 const kindOf = require("kind-of");
 const R = require("ramda");
 
-const {removeTrailingSlash, throwError} = require("../helpers");
+const {throwError} = require("../helpers/functional");
+const {removeTrailingSlash} = require("../helpers/string");
 
 const {StdOpt, NewOpt} = require("../options");
 

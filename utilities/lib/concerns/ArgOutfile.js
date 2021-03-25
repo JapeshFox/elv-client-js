@@ -4,7 +4,9 @@ const fs = require("fs");
 const columnify = require("columnify");
 const R = require("ramda");
 
-const {absPath, identity} = require("../helpers");
+const {absPath} = require("../helpers/file_path");
+const {identity} = require("../helpers/functional");
+
 const {NewOpt} = require("../options");
 
 const Logger = require("./Logger");

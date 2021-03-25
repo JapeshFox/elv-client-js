@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const mime = require("mime-types");
 
-const {absPath} = require("../helpers");
+const {absPath} = require("../helpers/file_path");
 const {StdOpt} = require("../options");
 
 const Client = require("./Client");

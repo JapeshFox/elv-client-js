@@ -4,7 +4,7 @@ const kindOf = require("kind-of");
 const objectPath = require("object-path");
 const R = require("ramda");
 
-const {fabricItemDesc} = require("../helpers");
+const {fabricItemDesc} = require("../helpers/string");
 
 const Client = require("./Client");
 const Edit = require("./Edit");

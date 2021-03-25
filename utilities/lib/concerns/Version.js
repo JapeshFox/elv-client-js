@@ -1,7 +1,7 @@
 // Code relating to working with a specific fabric object version
 const R = require("ramda");
 
-const {fabricItemDesc} = require("../helpers");
+const {fabricItemDesc} = require("../helpers/string");
 
 const Utils = require("../../../src/Utils");
 

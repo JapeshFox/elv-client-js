@@ -4,7 +4,7 @@ const columnify = require("columnify");
 const moment = require("moment");
 const R = require("ramda");
 
-const {identity} = require("../helpers");
+const {identity} = require("../helpers/functional");
 const {NewOpt} = require("../options");
 
 const blueprint = {

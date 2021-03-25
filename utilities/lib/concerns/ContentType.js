@@ -1,5 +1,5 @@
 // code related to Content Types
-const {fabricItemDesc} = require("../helpers");
+const {fabricItemDesc} = require("../helpers/string");
 
 const Client = require("./Client");
 const Logger = require("./Logger");

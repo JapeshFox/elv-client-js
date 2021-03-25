@@ -2,7 +2,7 @@ const kindOf = require("kind-of");
 const moment = require("moment");
 const R = require("ramda");
 
-const {etaString} = require("../helpers");
+const {etaString} = require("../helpers/time");
 
 const Client = require("./Client");
 const Logger = require("./Logger");

@@ -1,4 +1,4 @@
-const {seconds} = require("../helpers");
+const {seconds} = require("../helpers/wait");
 
 const Client = require("./Client");
 const Logger = require("./Logger");

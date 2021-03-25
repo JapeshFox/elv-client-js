@@ -6,7 +6,7 @@ const yargsTerminalWidth = require("yargs").terminalWidth;
 
 const {loadConcerns} = require("./concerns");
 const {callContext, cmdLineContext} = require("./context");
-const {trimSlashes} = require("./helpers");
+const {trimSlashes} = require("./helpers/string");
 const {ChainOutArgModel} = require("./models/ChainOutArg");
 const {BuildWidget} = require("./options");
 

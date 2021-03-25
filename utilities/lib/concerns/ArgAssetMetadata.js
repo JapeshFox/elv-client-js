@@ -3,7 +3,7 @@ const kindOf = require("kind-of");
 const R = require("ramda");
 const slugify = require("@sindresorhus/slugify");
 
-const {throwError} = require("../helpers");
+const {throwError} = require("../helpers/functional");
 const {NonBlankString} = require("../models/Models");
 const {NewOpt, StdOpt} = require("../options");
 

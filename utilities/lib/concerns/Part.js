@@ -1,5 +1,5 @@
 // code related to working with a specific content part
-const {fabricItemDesc} = require("../helpers");
+const {fabricItemDesc} = require("../helpers/string");
 
 const Client = require("./Client");
 const Logger = require("./Logger");

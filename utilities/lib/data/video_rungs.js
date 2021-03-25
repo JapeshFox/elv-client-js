@@ -1,6 +1,6 @@
 const R = require("ramda");
 
-const {compare} = require("../helpers");
+const {compare} = require("../helpers/sort");
 const stdVidRungs = [
   {
     height: 2160,

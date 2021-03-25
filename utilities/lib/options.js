@@ -23,11 +23,9 @@ const {CheckedBlueprint} = require("./models/Blueprint");
 
 const StandardOptions = require("./StandardOptions");
 
-const {
-  camel2kebab, compare, join,
-  objUnwrapValues, subst,
-  valOrThrow
-} = require("./helpers");
+const {join, objUnwrapValues, valOrThrow} = require("./helpers/functional");
+const {compare} = require("./helpers/sort");
+const {camel2kebab, subst} = require("./helpers/string");
 
 // =====================================
 // utility functions

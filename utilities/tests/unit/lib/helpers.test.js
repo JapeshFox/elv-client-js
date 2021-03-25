@@ -2,7 +2,8 @@ const {expect} = require("chai");
 
 const R = require("ramda");
 
-const {etaString, padStart} = require("../../../lib/helpers");
+const {padStart} = require("../../../lib/helpers/string");
+const {etaString} = require("../../../lib/helpers/time");
 
 describe("padStart", () => {
 

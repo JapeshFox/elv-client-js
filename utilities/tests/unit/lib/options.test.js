@@ -3,7 +3,7 @@ const {expect} = require("chai");
 const Result = require("crocks/Result");
 const {Ok} = Result;
 
-const {valOrThrow} = require("../../../lib/helpers");
+const {valOrThrow} = require("../../../lib/helpers/functional");
 const {EmptyWidgetData} = require("../../../lib/models/WidgetData");
 
 const options = require("../../../lib/options");

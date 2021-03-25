@@ -1,7 +1,7 @@
 // Create a new mezzanine and start jobs
 const R = require("ramda");
 
-const {seconds} = require("./lib/helpers");
+const {seconds} = require("./lib/helpers/wait");
 const {ModOpt, NewOpt} = require("./lib/options");
 const Utility = require("./lib/Utility");
 

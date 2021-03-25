@@ -1,7 +1,8 @@
 // code related to loading / parsing JSON
 const {JSONPath} = require("jsonpath-plus");
 
-const {ellipsize, readFile, stringOrFileContents} = require("../helpers");
+const {ellipsize} = require("../helpers/string");
+const {readFile, stringOrFileContents} = require("../helpers/file_path");
 
 const Logger = require("./Logger");
 
