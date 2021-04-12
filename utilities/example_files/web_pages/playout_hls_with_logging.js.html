@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>Eluvio Playout - HLS.js (with playlist logging)</title>
+</head>
+
+<body>
+
+<div>
+    <h1>Eluvio Playout - HLS.js (with playlist logging to javascript console)</h1>
+</div>
+<div><label for="playoutURL">Enter playout URL:</label></div>
+<div><textarea id="playoutURL" style="width: 85%; height: 16em">https://host-66-220-3-86.contentfabric.io/qlibs/ilib38RbS79khNiPtYU96QTP9SjYR6yv/q/hq__64KtYjGN5ZfXTgaJTw6nREC5SavqqPijqQWCFWtMyPqehW13TvhVH8A7SFDegQM54sF4bNKaXm/rep/playout/default/hls-clear/playlist.m3u8?authorization=ascsj_2cEPqwJwF1Y9jq5tS2V2R6jTa7M2r6B52aSzhKKGvGKpdcpQ3riAH45owgcD622fagfuFhZEoQRovSfGUhumCRERNQGANFVnC2k3D75vC6ygxpSY1MrX3NE1DaKwz526KYZ5mtGgkDv84pMVPHhHbiMffve7EZYfDQrjdcQYQ5StMgJ7jxnRkrStVzkwFBAyVrcK752cJonf1SivTpNkKmqMe4fvaaDGqNsiLyRKtEixkSMxN7p1yKwNhzSZmTq7eM59iAG3Na9ZQVGBYBHj59vsETPzRDxWewUYaKjE3GMZ5tj3xS3DTSBLyfjrp885FfCp5MfQaQEeAf2K8V1WrZqadxRxi4h67z5FSwQU3TxgntqAo85MbJDKMMM3ysy2ze8gqfhoUigijpAfrwes74ZY8doQvkve78g4AkJKpUDZLau7LTGogaACtCmdJTEePPTqhp9SV5ZBtPYs2sqRkX6ZgwfLwAhoAu13xDFbJ6Ac388MmjGTxwzJgjq3SeYnVsYvK4m6sppk4StruDfcZ4KujnG4Mdo72u5vS33EL7qpbGB8Fd6x3AtsmK79uAkbnEFHhozyapBe72RU3CAYYZtumtECkXjLmqF9P5J4farVra1ZDi2G7ubpG7TQEJRgtDf6UFYZPBFyTzEy7xEBLSX6JVmpNLSoBFUzsAXzQRG6pVjAhD6ujKVzThJEr9rADESQewpzQmwtBYdKULh1Pcuu8ZhEqfpt6kPRSdWN5HYJGmSV7MRt2JmbL1NMAMfixmXXCDTfzx1xA7btP7cjFdFzmMAnYwNn9LxyDm5dykscy6aHFJKZNsDsBg9Qm6w8bhM1dB25WdMNABdsMpcFSA1czbYe3wjA689hpRX3qTTahysWrKnFXnsTnHvDB9Cq31ksoY2XdVTsiX3vALfnFvu6YLbvajxfytf67D2kAVFuZ3mfhEpFRHedqoTwQD4zBg3Cjr7ekmT6VgSNWBtmUvHLQda53v8pSNDLTXHf4ZxaM7f94DTFQ9cBd9ZQ7VSE7vpHSQ8bbKiP5EFFz3FMD2iNgwUWEfr8DDP7d1HM35Cqc9cYh3Vw5AaxeHNXvHNDeUuD6WVmc9FMYkDaffa4PwZ2PKi3HHtGyBpddsqtU3Czi1cLtdRFrNYUHAskNJKNpn9Eiig84qzNn8Q6XubeAQysKQ1mTAe3TovhJWuhcrvNkx3N12RdK8U3j7Bqz6SNz9sENica3CUHUcdaFpLGUDRiHe2gQkJncAAfgQYxo7iU.RVMyNTZLX0tKdHl6OVlqVW8zYzVaM294U2dCZmNya2FDVTFCOVpWNkw1TTYydm9RRW9NM3NkWEJwNmdCaml5U0VTcTF0NEFBd1RRWjlLelNLOXlTdWZQQlN1WUs1TGJW</textarea></div>
+<div style="padding: 1em">
+    <button id="btnPlay" onclick="playButtonPushed()">Play!</button>
+    <label for="mute">&nbsp;Start muted: </label><input id="mute" type="checkbox" checked="true"/>
+    <button id="btnStop" onclick="stopButtonPushed()">Stop!</button>
+</div>
+<div>
+    <video height="400" id="video" controls></video>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<script type="application/javascript">
+
+  var hls;
+
+  const playButtonPushed = () => {
+    console.log("Play button pushed");
+    startPlayout(document.getElementById("playoutURL").value);
+  }
+
+  const stopButtonPushed = () => {
+    console.log("Stop button pushed");
+    hls.destroy();
+  }
+
+  const startPlayout = (playoutURL) => {
+    if(Hls.isSupported()) {
+      var video = document.getElementById("video");
+      hls = new Hls();
+      // bind them together
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+        console.log("video and hls.js are now bound together !");
+        hls.loadSource(playoutURL);
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          console.log("manifest loaded, found " + data.levels.length + " quality level");
+          console.log("starting playout");
+          video.muted = document.getElementById("mute").checked;
+          video.play();
+        });
+      });
+    } else {
+      window.alert("HLS.js not supported");
+    }
+  };
+
+  // =====================================================================================
+  // CREATE PROXY FOR XMLHttpRequest to monitor and modify outgoing requests
+  // =====================================================================================
+
+  // const playoutURLParseRegEx = /(^.+\/rep\/channel\/[^\/]+\/)([^\/]+)\//;
+
+  const _Eluv_XMLHttpRequest = window.XMLHttpRequest;
+
+  const XMLHttpRequestClassHandler = {
+    construct: (target, args) => {
+      // console.log('XMLHttpRequestClassHandler constructor called ');
+      return new Proxy(
+        new _Eluv_XMLHttpRequest(),
+        {
+          get: (target, name, trap) => {
+            if(typeof target[name] === "function") {
+              // console.log(`XML Proxy function called: ${name}`)
+              let result;
+              return (...args) => {
+                switch(name) {
+                  case "open":
+                    // call is to open ajax request
+                    result = target[name].apply(target, args);
+                    return result;
+                  case "send":
+                    // console.log(`send: ${args}`);
+                    if(typeof target.onreadystatechange === 'function') {
+                      const originalCallback = target.onreadystatechange;
+                      // console.log("originalCallback=");
+                      // console.log(originalCallback);
+                      target.onreadystatechange = function () {
+                        // console.log("replacement callback invoked");
+                        // console.log(this);
+                        if(this.readyState === XMLHttpRequest.DONE) {
+                          const status = this.status;
+                          if (status === 0 || (status >= 200 && status < 400)) {
+                            // The request has been completed successfully
+                            if(this.responseType=="text" || this.responseType==""){
+                              console.log(this.responseText);
+                              const url = new URL(this.responseURL);
+                              console.log(` ↑↑↑ ${url.pathname}`);
+                            }
+                          } else {
+                            console.log(`error status ${status}`);
+                          }
+                        }
+                        // console.log(...arguments);
+                        originalCallback.call(this, ...arguments);
+                      }
+                    }
+
+                    result = target[name].apply(target, args);
+                    return result;
+                  case "abort":
+                    // console.log('abort')
+                    result = target[name].apply(target, args);
+                    return result;
+                  default:
+                    // console.log(name)
+                    result = target[name].apply(target, args);
+                    return result;
+                }
+              };
+            } else {
+              return target[name];
+            }
+          },
+          set: (target, name, value) => {
+            // console.log(`set ${name}=${value}`);
+            target[name] = value;
+            return true;
+          }
+        }
+      );
+    }
+  };
+
+  window.XMLHttpRequest = new Proxy(_Eluv_XMLHttpRequest, XMLHttpRequestClassHandler);
+
+
+</script>
+
+</body>
+</html>
+
+

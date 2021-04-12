@@ -10,9 +10,10 @@
     <h1>Eluvio Playout - HLS.js</h1>
 </div>
 <div><label for="playoutURL">Enter playout URL:</label></div>
-<div><textarea id="playoutURL" style="width: 50%; height: 10em"></textarea></div>
-<div>
+<div><textarea id="playoutURL" style="width: 85%; height: 16em"></textarea></div>
+<div style="padding: 1em">
     <button id="btnPlay" onclick="playButtonPushed()">Play!</button>
+    <label for="mute">&nbsp;Start muted: </label><input id="mute" type="checkbox" checked="true"/>
 </div>
 <div>
     <video height="400" id="video" controls></video>
@@ -23,6 +24,7 @@
 <script type="application/javascript">
 
   const playButtonPushed = () => {
+    console.log("Play button pushed");
     startPlayout(document.getElementById("playoutURL").value);
   }
 
@@ -33,11 +35,12 @@
       // bind them together
       hls.attachMedia(video);
       hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-        // console.log("video and hls.js are now bound together !");
+        console.log("video and hls.js are now bound together !");
         hls.loadSource(playoutURL);
         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-          // console.log("manifest loaded, found " + data.levels.length + " quality level");
-          // console.log("starting playout");
+          console.log("manifest loaded, found " + data.levels.length + " quality level");
+          console.log("starting playout");
+          video.muted = document.getElementById("mute").checked;
           video.play();
         });
       });
