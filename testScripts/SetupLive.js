@@ -58,7 +58,6 @@ const udpTsStream = {
   maxDurationSec: 600,
   sourceTimescale: 90000,
   udpPort: 22001,                       // required for udp
-  xcType: "all",                        // all, audio, video
   simpleWatermark: {
     "font_color": "white@0.5",
     "font_relative_height": 0.05000000074505806,
@@ -70,6 +69,7 @@ const udpTsStream = {
   },
 }
 
+// For 2020-11-06_20-22-32_KSAZ.pcap
 const udpTsStream2 = {
   txParams: {
     "audio_bitrate": 128000,                // required
@@ -91,7 +91,30 @@ const udpTsStream2 = {
   maxDurationSec: 600,
   sourceTimescale: 90000,
   udpPort: 22001,                           // required for udp
-  xcType: "all",                            // all, audio, video
+}
+
+// For fs1-mpegts-2019-11-25.cap
+const udpTsStream3 = {
+  txParams: {
+    "audio_bitrate": 128000,                // required
+    "n_audio": 1,
+    "audio_index": [0,0,0,0,0,0,0,0],       // required
+    "ecodec2": "aac",                       // required
+    "sample_rate": 48000,                   // Hz, required
+    "seg_duration": "30.03",
+    "format": "fmp4-segment",
+    "audio_seg_duration_ts": 1441440,       // 30.03s @ 48000 Hz @ 1024 samples per frame; part size, required
+    "enc_height": 720,
+    "enc_width": 1280,
+    "force_keyint": 120,
+    "video_seg_duration_ts": 2702700,       // 30.03s @ 60000/1001 fps
+    "video_bitrate": 20000000,              // 20 Mbps
+    "sync_audio_to_stream_id": -1,
+   },
+  ingestType: "udp",
+  maxDurationSec: 600,
+  sourceTimescale: 90000,
+  udpPort: 22001,                           // required for udp
 }
 
 const rtmpStream = {
@@ -151,7 +174,6 @@ const rtmpStream = {
   maxDurationSec: 600,
   sourceTimescale: 16000,
   udpPort: 22001,               // required for udp
-  xcType: "all",                // all, audio, video
   partTTL: 0,
   //rtmpURL: "rtmp://localhost:5000/test002",
   rtmpURL: "rtmp://192.168.90.202:1935/rtmp/XQjNir3S",
@@ -162,14 +184,14 @@ const rtmpStream2 = {
   txParams: {
     "audio_bitrate": 128000,    // required
     "n_audio": 1,
-    "audio_index": [0,0,0,0,0,0,0,0],           // required
+    "audio_index": [1,0,0,0,0,0,0,0],           // required
     "ecodec2": "aac",           // required
     "sample_rate": 48000,       // Hz, required
     "seg_duration": "30.03",
     "audio_seg_duration_ts": 1441440, //1443840 30s @ 48000 Hz @ 1024 samples per frame; part size, required
     "enc_height": 1080,
     "enc_width": 1920,
-    "force_keyint": 48,
+    "force_keyint": 120,
     "format": "fmp4-segment",
     "video_seg_duration_ts": 480480,    // 30*16000
     "video_bitrate": 20000000,          // 20 Mbps
@@ -178,15 +200,15 @@ const rtmpStream2 = {
   maxDurationSec: 600,
   sourceTimescale: 16000,
   udpPort: 22001,               // required for udp
-  xcType: "all",                // all, audio, video
   //partTTL: 0,
-  rtmpURL: "rtmp://localhost:5000/test002",
+  //rtmpURL: "rtmp://localhost:5000/test002",
+  rtmpURL: "rtmp://localhost:1935/rtmp/JxTT1dFA",
   //rtmpURL: "rtmp://localhost:1936/rtmp/XQjNir6S",
   listen: true,
 }
 
-const streamParams = rtmpStream
-//const streamParams = udpTsStream2
+const streamParams = rtmpStream2
+//const streamParams = udpTsStream3
 
 const confLocal = {
   txParams: streamParams.txParams,
@@ -211,7 +233,6 @@ const confLocal = {
   sourceTimescale: streamParams.sourceTimescale,
   udpPort: streamParams.udpPort,
   simpleWatermark: streamParams.simpleWatermark,
-  xcType: streamParams.xcType,
   partTTL: streamParams.partTTL,
   rtmpURL: streamParams.rtmpURL,
   listen: streamParams.listen,
@@ -373,7 +394,6 @@ const Test = async () => {
         "ingress_node_api": conf.ingressNodeApiUrl,
         "ingress_node_id": conf.ingressNodeId,
         "max_duration_sec": conf.maxDurationSec,
-        "xc_type": conf.xcType,
         "part_ttl": conf.partTTL,
         "rtmp_url": conf.rtmpURL,
         "listen": conf.listen,
