@@ -12,7 +12,7 @@ const { ElvClient } = require("../src/ElvClient.js")
  *   fabricURIs/ingressNodeApiUrl is network.seed_nodes.fabric_api
  *   ethereumURIs is network.seed_nodes.ethereum_api
  *   ingressNodeId is node_id
- * 
+ *
  * TODO: Load configuration from a file
  */
 
@@ -454,6 +454,117 @@ const Test = async () => {
   }
 }
 
+
+
+
+const StartStream = async () => {
+
+  conf = {
+	clientConf: {
+	  contentSpaceId: "ispc3ANoVSzNA3P6t7abLR69ho5YPPZU",
+      fabricURIs: ["https://host-184-104-204-51.contentfabric.io"],
+      ethereumURIs: ["https://host-184-104-204-51.contentfabric.io/eth"],
+	},
+	libraryId: "ilib4UgUTory7GwH1k1syc77Uxnq7bMq",
+	objectId: "iq__tVCfNiMQw5tHCY6TPtZd5CzhaGC",
+	signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
+  try {
+    let client
+    if (conf.clientConf.configUrl) {
+      client = await ElvClient.FromConfigurationUrl({
+        configUrl: conf.clientConf.configUrl
+      })
+    } else {
+      client = new ElvClient(conf.clientConf)
+    }
+    const wallet = client.GenerateWallet()
+    const signer = wallet.AddAccount({ privateKey: conf.signerPrivateKey })
+    client.SetSigner({ signer })
+    const fabURI = client.fabricURIs[0]
+    console.log("Fabric URI: " + fabURI)
+    const ethURI = client.ethereumURIs[0]
+    console.log("Ethereum URI: " + ethURI)
+
+    //client.ToggleLogging(true);
+
+    if (PRINT_DEBUG) console.log("EditContentObject", conf.libraryId, conf.objectId)
+    response = await client.EditContentObject({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId
+    })
+    const edgeToken = response.write_token
+    console.log("Edge token:", edgeToken)
+
+    /*
+     * Set the metadata, including the edge token.
+     */
+    if (PRINT_DEBUG) console.log("EditContentObject", conf.libraryId, conf.objectId)
+    response = await client.EditContentObject({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId
+    })
+    writeToken = response.write_token
+
+    if (PRINT_DEBUG) console.log("MergeMetadata", conf.libraryId, conf.objectId, writeToken)
+    await client.MergeMetadata({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId,
+      writeToken: writeToken,
+      metadata: {
+        "edge_write_token": edgeToken,
+      }
+    })
+
+     if (PRINT_DEBUG) console.log("FinalizeContentObject", conf.libraryId, conf.objectId, writeToken)
+    response = await client.FinalizeContentObject({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId,
+      writeToken: writeToken
+    })
+    const objectHash = response.hash
+    console.log("Object hash:", objectHash)
+
+    if (PRINT_DEBUG) console.log("AuthorizationToken", conf.libraryId, conf.objectId)
+    response = await client.authClient.AuthorizationToken({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId,
+      versionHash: "",
+      channelAuth: false,
+      noCache: true,
+      update: true,
+    })
+
+    const curlCmd = "curl -s -H \"$AUTH_HEADER\" "
+    const fabLibHashURI = fabURI + "/qlibs/" + conf.libraryId + "/q/" + objectHash
+    const fabLibTokenURI = fabURI + "/qlibs/" + conf.libraryId + "/q/" + edgeToken
+
+    console.log("\nSet Authorization header:\nexport AUTH_HEADER=\"" +
+      "Authorization: Bearer " + response + "\"")
+
+    console.log("\nInspect metadata:\n" +
+      curlCmd + fabLibHashURI + "/meta | jq")
+
+    console.log("\nInspect edge metadata:\n" +
+      curlCmd + fabLibTokenURI + "/meta | jq")
+
+    console.log("\nStart recording (returns HANDLE):\n" +
+      curlCmd + fabLibTokenURI + "/call/live/start | jq")
+
+    console.log("\nStop recording (use HANDLE from start):\n" +
+      curlCmd + fabLibTokenURI + "/call/live/stop/HANDLE")
+
+    console.log("\nPlayout options:\n" +
+      curlCmd + fabLibHashURI + "/rep/live/default/options.json | jq")
+
+    console.log("\nHLS playlist:\n" +
+      fabLibHashURI + "/rep/live/default/hls-clear/playlist.m3u8")
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 function sleep(ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
@@ -461,3 +572,5 @@ function sleep(ms) {
 }
 
 Test()
+
+//StartStream()
