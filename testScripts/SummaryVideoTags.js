@@ -1,4 +1,7 @@
 const {ElvClient} = require("../src/ElvClient");
+const fs = require("fs");
+const path = require("path");
+
 
 const ClientConfiguration = require("../TestConfiguration.json");
 
@@ -8,7 +11,11 @@ function Counter(array) {
     return count;
 }
 
-const Summary = async (libId, objId) => {
+const Summary = async (libId, objId, targetPath) => {
+    const textFilePath = path.join(targetPath, "iqFailed.txt");
+    try {fs.unlinkSync(textFilePath);} catch(error) {}
+    var fs = require('fs')
+    var iqLogger = fs.createWriteStream(textFilePath, {flags: 'a'})
     try {
         const client = await ElvClient.FromConfigurationUrl({
             configUrl: ClientConfiguration["config-url"]
@@ -19,7 +26,7 @@ const Summary = async (libId, objId) => {
         });
         await client.SetSigner({signer});
 
-        console.log("Getting video tags " + libId + objId);
+        console.log("Getting video tags " + libId + " " + objId);
         const videoTags = await client.ContentObjectMetadata({
             libraryId: libId,
             objectId: objId,
@@ -27,6 +34,11 @@ const Summary = async (libId, objId) => {
         });
         const metadataTags = videoTags.metadata_tags
         // console.log(JSON.stringify(metadataTags));
+
+        //if ("summary" in videoTags) {
+        //    console.log("Skip " + objId + ", video tag summarized");
+        //    return
+        //}
 
         console.log("Summarizing video tags...");
         var celebrityTags = [];
@@ -122,9 +134,10 @@ const Summary = async (libId, objId) => {
             commitMessage: "Add video tags summary"
         })
         console.log(res);
-        console.log("Finished " + libId + objId);
+        console.log("Finished " + libId + " " + objId);
 
     } catch(error) {
+        iqLogger.write(objId + '\n')
         console.error("Unrecoverable error:");
         console.log(JSON.stringify(error, null, 2));
         console.error(error.body ? error.body : error);
@@ -134,8 +147,13 @@ const Summary = async (libId, objId) => {
 const libId = process.argv[2];
 const objId = process.argv[3];
 
+var targetPath = process.argv[4];
+if (targetPath == null) {
+    targetPath = "./"
+}
+
 if(!libId || !objId) {
-    console.error("Usage: node SummaryVideoTags.js libId objId");
+    console.error("Usage: node SummaryVideoTags.js libId objId targetPath(optional)");
     return;
 }
 
@@ -147,6 +165,6 @@ if(!privateKey) {
 
 Summary(
     libId,
-    objId
+    objId,
+    targetPath
 );
-
