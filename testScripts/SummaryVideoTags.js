@@ -19,13 +19,12 @@ const Summary = async (libId, objId) => {
         });
         await client.SetSigner({signer});
 
-        console.log("Getting video tags...");
+        console.log("Getting video tags " + libId + objId);
         const videoTags = await client.ContentObjectMetadata({
             libraryId: libId,
             objectId: objId,
             metadataSubtree: "video_tags",
         });
-
         const metadataTags = videoTags.metadata_tags
         // console.log(JSON.stringify(metadataTags));
 
@@ -120,10 +119,10 @@ const Summary = async (libId, objId) => {
             libraryId: libId,
             objectId: objId,
             writeToken: edit["write_token"],
-            commitMessage: "Test - add video tags summary"
+            commitMessage: "Add video tags summary"
         })
         console.log(res);
-        console.log("Finished");
+        console.log("Finished " + libId + objId);
 
     } catch(error) {
         console.error("Unrecoverable error:");
