@@ -118,6 +118,10 @@ const udpTsStream3 = {
 }
 
 const rtmpStream = {
+  livePlayoutConfig: {
+    "vod_enabled": true,
+    "rebroadcast_start_time_sec_epoch": 1619192786,
+  },
   txParams: {
     "audio_bitrate": 128000,    // required
     "n_audio": 1,
@@ -132,7 +136,8 @@ const rtmpStream = {
     "format": "fmp4-segment",
     //"video_seg_duration_ts": 480480,    // 30.03*16000
     "video_bitrate": 20000000,          // 20 Mbps
-   },
+    "preset": "faster"
+  },
   ladderSpecs:
   [
     {
@@ -171,7 +176,7 @@ const rtmpStream = {
       }
   ],
   ingestType: "rtmp",
-  maxDurationSec: 600,
+  //maxDurationSec: 600,
   sourceTimescale: 16000,
   udpPort: 22001,               // required for udp
   partTTL: 0,
@@ -207,12 +212,13 @@ const rtmpStream2 = {
   listen: true,
 }
 
-const streamParams = rtmpStream2
+const streamParams = rtmpStream
 //const streamParams = udpTsStream3
 
 const confLocal = {
   txParams: streamParams.txParams,
   ladderSpecs: streamParams.ladderSpecs,
+  livePlayoutConfig: streamParams.livePlayoutConfig,
 
   clientConf: {
     configUrl: "",
@@ -228,6 +234,7 @@ const confLocal = {
   libraryId: "ilib8SLzhEyJWiJ41BPezhswG56MUwL",
   maxDurationSec: streamParams.maxDurationSec,
   objectType: "iq__AzMAxaZXN5MPAa2SvxhGMh56JCY",
+  //objectType: "iq__3iKHtoBWDzp9bqSM5JebdosM2XRk",
   originUrl: streamParams.originUrl,
   signerPrivateKey: process.env.PRIVATE_KEY,
   sourceTimescale: streamParams.sourceTimescale,
@@ -388,6 +395,7 @@ const Test = async () => {
       metadata: {
         "tx_params": conf.txParams,
         "ladder_specs": conf.ladderSpecs,
+        "live_playout_config": conf.livePlayoutConfig,
         "description": "Lorem ipsum dolor sit amet",
         "edge_write_token": edgeToken,
         "ingest_type": conf.ingestType,
@@ -459,7 +467,7 @@ const Test = async () => {
 
 const StartStream = async () => {
 
-  conf = {
+  let confDemoV3 = {
 	clientConf: {
 	  contentSpaceId: "ispc3ANoVSzNA3P6t7abLR69ho5YPPZU",
       fabricURIs: ["https://host-184-104-204-51.contentfabric.io"],
@@ -467,6 +475,17 @@ const StartStream = async () => {
 	},
 	libraryId: "ilib4UgUTory7GwH1k1syc77Uxnq7bMq",
 	objectId: "iq__tVCfNiMQw5tHCY6TPtZd5CzhaGC",
+	signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
+  let conf = {
+	clientConf: {
+	  contentSpaceId: "ispc2RUoRe9eR2v33HARQUVSp1rYXzw1",
+	  fabricURIs: ["https://host-76-74-29-72.contentfabric.io"],
+	  ethereumURIs: ["https://host-76-74-29-72.contentfabric.io/eth"],
+	},
+	libraryId: "ilibrS3uYZvQ12Wp6yKhgVJBPGwEjy8",
+	objectId: "iq__3pe6LRKS5e5maA3F73zR52Kh7iey",
 	signerPrivateKey: process.env.PRIVATE_KEY,
   }
 
