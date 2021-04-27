@@ -478,16 +478,31 @@ const StartStream = async () => {
 	signerPrivateKey: process.env.PRIVATE_KEY,
   }
 
-  let conf = {
+  /* Prod mi1-007 */
+  let confProd = {
 	clientConf: {
 	  contentSpaceId: "ispc2RUoRe9eR2v33HARQUVSp1rYXzw1",
 	  fabricURIs: ["https://host-76-74-29-72.contentfabric.io"],
 	  ethereumURIs: ["https://host-76-74-29-72.contentfabric.io/eth"],
 	},
 	libraryId: "ilibrS3uYZvQ12Wp6yKhgVJBPGwEjy8",
-	objectId: "iq__3pe6LRKS5e5maA3F73zR52Kh7iey",
+	objectId: "iq__3GZTjsmggzvAmtqHx96qA28CX25c",
 	signerPrivateKey: process.env.PRIVATE_KEY,
   }
+
+  let confMGFF = {
+	clientConf: {
+	  contentSpaceId: "ispc2RUoRe9eR2v33HARQUVSp1rYXzw1",
+	  fabricURIs: ["https://host-76-74-29-74.contentfabric.io"],
+	  ethereumURIs: [" https://host-76-74-29-74.contentfabric.io/eth"],
+	},
+	libraryId: "ilib2vKhMTQkTrtsdBgEmav5MJBrpppe",
+	//objectId: "iq__34yszb4PHMxPxGL4DUTHTe6ejwQe", // Day 1
+	objectId: "iq__3VcGdGszVFCAG5RY2BgkkjQFsKiG", // Day 2
+	signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
+  let conf = confDemoV3;
 
   try {
     let client
@@ -506,7 +521,7 @@ const StartStream = async () => {
     const ethURI = client.ethereumURIs[0]
     console.log("Ethereum URI: " + ethURI)
 
-    //client.ToggleLogging(true);
+    client.ToggleLogging(false);
 
     if (PRINT_DEBUG) console.log("EditContentObject", conf.libraryId, conf.objectId)
     response = await client.EditContentObject({
@@ -584,12 +599,110 @@ const StartStream = async () => {
   }
 }
 
+const ConfigStream = async () => {
+
+  let confDemoV3 = {
+	clientConf: {
+	  contentSpaceId: "ispc3ANoVSzNA3P6t7abLR69ho5YPPZU",
+      fabricURIs: ["https://host-184-104-204-51.contentfabric.io"],
+      ethereumURIs: ["https://host-184-104-204-51.contentfabric.io/eth"],
+	},
+	libraryId: "ilib4UgUTory7GwH1k1syc77Uxnq7bMq",
+	objectId: "iq__tVCfNiMQw5tHCY6TPtZd5CzhaGC",
+	signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
+  /* Prod mi1-007 */
+  let confProd = {
+	clientConf: {
+	  contentSpaceId: "ispc2RUoRe9eR2v33HARQUVSp1rYXzw1",
+	  fabricURIs: ["https://host-76-74-29-72.contentfabric.io"],
+	  ethereumURIs: ["https://host-76-74-29-72.contentfabric.io/eth"],
+	},
+	libraryId: "ilibrS3uYZvQ12Wp6yKhgVJBPGwEjy8",
+	objectId: "iq__3GZTjsmggzvAmtqHx96qA28CX25c",
+	signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
+  let confMGFF = {
+	clientConf: {
+	  contentSpaceId: "ispc2RUoRe9eR2v33HARQUVSp1rYXzw1",
+	  fabricURIs: ["https://host-76-74-29-74.contentfabric.io"],
+	  ethereumURIs: [" https://host-76-74-29-74.contentfabric.io/eth"],
+	},
+	libraryId: "ilib2vKhMTQkTrtsdBgEmav5MJBrpppe",
+	//objectId: "iq__34yszb4PHMxPxGL4DUTHTe6ejwQe", // Day 1
+	objectId: "iq__3VcGdGszVFCAG5RY2BgkkjQFsKiG", // Day 2
+	signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
+  let conf = confDemoV3;
+
+  try {
+    let client
+    if (conf.clientConf.configUrl) {
+      client = await ElvClient.FromConfigurationUrl({
+        configUrl: conf.clientConf.configUrl
+      })
+    } else {
+      client = new ElvClient(conf.clientConf)
+    }
+    const wallet = client.GenerateWallet()
+    const signer = wallet.AddAccount({ privateKey: conf.signerPrivateKey })
+    client.SetSigner({ signer })
+    const fabURI = client.fabricURIs[0]
+    console.log("Fabric URI: " + fabURI)
+    const ethURI = client.ethereumURIs[0]
+    console.log("Ethereum URI: " + ethURI)
+
+    client.ToggleLogging(false);
+
+    let mainMeta = await client.ContentObjectMetadata({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId
+    })
+    //console.log("Main meta:", mainMeta)
+
+	edgeWriteToken = mainMeta.edge_write_token;
+
+    let edgeMeta = await client.ContentObjectMetadata({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId,
+	  writeToken: edgeWriteToken
+    })
+    //console.log("Edge meta:", edgeMeta)
+
+	console.log("CONFIG: ", edgeMeta.live_recording_parameters.live_playout_config);
+	console.log("recording_start_time: ", edgeMeta.recording_start_time);
+	console.log("recording_stop_time:  ", edgeMeta.recording_stop_time);
+
+	// Set rebroadcast start
+	edgeMeta.live_recording_parameters.live_playout_config.rebroadcast_start_time_sec_epoch = 1619558151;
+
+    if (PRINT_DEBUG) console.log("MergeMetadata", conf.libraryId, conf.objectId, writeToken)
+    await client.MergeMetadata({
+      libraryId: conf.libraryId,
+      objectId: conf.objectId,
+      writeToken: edgeWriteToken,
+      metadata: {
+        "live_recording_parameters": {
+		  "live_playout_config" : edgeMeta.live_recording_parameters.live_playout_config
+		}
+	  }
+    });
+
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 function sleep(ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)
   })
 }
 
-Test()
+//Test()
 
 //StartStream()
+ConfigStream()

@@ -38,9 +38,11 @@ const CreateClient = async (name, bux="2") => {
     const w = global.window;
     global.window = undefined;
 
+    console.log("DEBUG U000");
     const fundedClient = await ElvClient.FromConfigurationUrl({configUrl: ClientConfiguration["config-url"]});
     const client = await ElvClient.FromConfigurationUrl({configUrl: ClientConfiguration["config-url"]});
 
+    console.log("DEBUG U001");
     const wallet = client.GenerateWallet();
     const fundedSigner = wallet.AddAccount({privateKey});
 
@@ -55,6 +57,7 @@ const CreateClient = async (name, bux="2") => {
     // Create a new account and send some ether
     const signer = wallet.AddAccountFromMnemonic({mnemonic});
 
+    console.log("DEBUG U003");
     // Each test file is run in parallel, so there may be collisions when initializing - retry until success
     for(let i = 0; i < 5; i++) {
       try {
@@ -69,11 +72,14 @@ const CreateClient = async (name, bux="2") => {
       }
     }
 
+    console.log("DEBUG U100");
+
     // Ensure transaction has time to resolve fully before continuing
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     await client.SetSigner({signer});
 
+    console.log("DEBUG U200");
     client.clientName = name;
     client.initialBalance = parseFloat(bux);
 
@@ -81,16 +87,20 @@ const CreateClient = async (name, bux="2") => {
     client.Crypto = ElvCrypto;
     await client.Crypto.ElvCrypto();
 
+    console.log("DEBUG U300");
+
     // Re-initialize global.window for frame client and ensure that window.crypto is set for elv-crypto
     global.window = w;
     if(typeof w !== "undefined") {
       global.window.crypto = global.crypto;
     }
 
+    console.log("DEBUG U400");
     if(process.env["DEBUG"]) {
       client.ToggleLogging(true);
     }
 
+    console.log("DEBUG U400");
     // Create user wallet
     await client.userProfileClient.CreateWallet();
 

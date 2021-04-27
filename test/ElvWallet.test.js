@@ -18,7 +18,9 @@ let client, wallet;
 // Describe blocks and tests within them are run in order
 describe("Test ElvWallet", () => {
   beforeAll(async () => {
+    console.log("DEBUG 001");
     client = await CreateClient("ElvWallet");
+    console.log("DEBUG 002");
     wallet = OutputLogger(ElvWallet, client.GenerateWallet());
   });
 
