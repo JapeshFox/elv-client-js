@@ -17,6 +17,7 @@ const MAX_REPORTED_DURATION_TOLERANCE = 15 * 60; // 15 minutes
 
 const STATE_UNKNOWN = "unknown";
 const STATE_FINISHED = "finished";
+const STATE_CANCELLED = "cancelled by node shutdown";
 const STATE_RUNNING = "running";
 const STATE_STALLED = "stalled";
 const STATE_BAD_PCT = "bad_percentage";
@@ -31,7 +32,8 @@ const New = context => {
     [STATE_RUNNING]: 2,
     [STATE_STALLED]: 3,
     [STATE_BAD_PCT]: 4,
-    [STATE_ERROR]: 5
+    [STATE_ERROR]: 5,
+    [STATE_CANCELLED]: 6
   };
 
   const estJobTotalSeconds = (duration_ms, progress_pct) => duration_ms / (10 * progress_pct); // === (duration_ms/1000) / (progress_pct/100)

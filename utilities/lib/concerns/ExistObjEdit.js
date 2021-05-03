@@ -33,6 +33,8 @@ const New = context => {
     });
   };
 
+  const latestHash = async () => await context.concerns.ExistObj.latestHash();
+
   const libraryId = async () => await argsProc().libraryId;
 
   const metadata = async ({subtree} = {}) => await context.concerns.ExistObj.metadata({subtree});
@@ -62,6 +64,7 @@ const New = context => {
     del,
     finalize,
     getWriteToken,
+    latestHash,
     libraryId,
     metadata,
     metadataWrite,

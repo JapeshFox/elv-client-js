@@ -20,9 +20,12 @@ const New = context => {
 
   const del = async () => await context.concerns.ArgObjectId.objDelete();
 
+  const latestHash = async () => await context.concerns.ArgObjectId.objLatestHash();
+
   const libraryId = async () => await argsProc().libraryId;
 
   const metadata = async ({subtree} = {}) => await context.concerns.ArgObjectId.objMetadata({subtree});
+
 
   const partList = async () => await context.concerns.ArgObjectId.objPartList();
 
@@ -34,6 +37,7 @@ const New = context => {
   return {
     argsProc,
     del,
+    latestHash,
     libraryId,
     metadata,
     partList,

@@ -40,8 +40,8 @@ const New = context => {
         logger.log("New object version now available");
         publishFinished = true;
       } else {
-        logger.log("  new version not available yet, waiting 15 seconds...");
-        await seconds(15);
+        logger.log("  new version not available yet, waiting 5 seconds...");
+        await seconds(5);
       }
     }
   };

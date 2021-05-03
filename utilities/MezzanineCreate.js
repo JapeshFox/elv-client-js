@@ -142,7 +142,10 @@ class MezzanineCreate extends Utility {
     );
 
     const type = (existingMezId && !this.args.type)
-      ? await this.concerns.ContentType.forItem({libraryId, objectId: existingMezId})
+      ? await this.concerns.ContentType.forItem({
+        libraryId,
+        objectId: existingMezId
+      })
       : await this.concerns.ArgType.typVersionHash();
 
     if(existingMezId) {
@@ -226,7 +229,7 @@ class MezzanineCreate extends Utility {
     logger.errorsAndWarnings(finalizeAbrResponse);
     logger.logList(
       "",
-      "ABR mezzanine object created:",
+      "ABR mezzanine object finalized:",
       `  Object ID: ${objectId}`,
       `  Version Hash: ${latestHash}`,
       ""
