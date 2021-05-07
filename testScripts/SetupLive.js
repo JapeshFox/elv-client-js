@@ -118,9 +118,9 @@ const udpTsStream3 = {
 }
 
 const rtmpStream = {
-  livePlayoutConfig: {
-    "vod_enabled": true,
-    "rebroadcast_start_time_sec_epoch": 1619192786,
+  playoutConfig: {
+    "vod_enabled": false,
+    "rebroadcast_start_time_sec_epoch": 0,
   },
   txParams: {
     "audio_bitrate": 128000,    // required
@@ -186,6 +186,10 @@ const rtmpStream = {
 }
 
 const rtmpStream2 = {
+  playoutConfig: {
+    "vod_enabled": false,
+    "rebroadcast_start_time_sec_epoch": 0,
+  },
   txParams: {
     "audio_bitrate": 128000,    // required
     "n_audio": 1,
@@ -196,29 +200,29 @@ const rtmpStream2 = {
     "audio_seg_duration_ts": 1441440, //1443840 30s @ 48000 Hz @ 1024 samples per frame; part size, required
     "enc_height": 1080,
     "enc_width": 1920,
-    "force_keyint": 120,
+    "force_keyint": 48,
     "format": "fmp4-segment",
     "video_seg_duration_ts": 480480,    // 30*16000
     "video_bitrate": 20000000,          // 20 Mbps
   },
   ingestType: "rtmp",
-  maxDurationSec: 600,
+  //maxDurationSec: 600,
   sourceTimescale: 16000,
   udpPort: 22001,               // required for udp
-  //partTTL: 0,
+  partTTL: 0,
   //rtmpURL: "rtmp://localhost:5000/test002",
   rtmpURL: "rtmp://localhost:1935/rtmp/JxTT1dFA",
   //rtmpURL: "rtmp://localhost:1936/rtmp/XQjNir6S",
   listen: true,
 }
 
-const streamParams = rtmpStream
+const streamParams = rtmpStream2
 //const streamParams = udpTsStream3
 
 const confLocal = {
   txParams: streamParams.txParams,
   ladderSpecs: streamParams.ladderSpecs,
-  livePlayoutConfig: streamParams.livePlayoutConfig,
+  playoutConfig: streamParams.playoutConfig,
 
   clientConf: {
     configUrl: "",
@@ -393,24 +397,34 @@ const Test = async () => {
       objectId: objectId,
       writeToken: writeToken,
       metadata: {
-        "tx_params": conf.txParams,
-        "ladder_specs": conf.ladderSpecs,
-        "live_playout_config": conf.livePlayoutConfig,
-        "description": "Lorem ipsum dolor sit amet",
-        "edge_write_token": edgeToken,
-        "ingest_type": conf.ingestType,
-        "ingress_node_api": conf.ingressNodeApiUrl,
-        "ingress_node_id": conf.ingressNodeId,
-        "max_duration_sec": conf.maxDurationSec,
-        "part_ttl": conf.partTTL,
-        "rtmp_url": conf.rtmpURL,
-        "listen": conf.listen,
-        "name": "Live Test - " + Date().toLocaleString(),
-        "origin_url": conf.originUrl,
-        "playout_type" : "live",
-        "source_timescale": conf.sourceTimescale,
-        "udp_port": conf.udpPort,
-        "simple_watermark": conf.simpleWatermark,
+        "live_recording": {
+          "fabric_config": {
+            "ingress_node_api": conf.ingressNodeApiUrl,
+            "ingress_node_id": conf.ingressNodeId,
+            "edge_write_token": edgeToken,
+          },
+          "recording_config": {
+            "recording_params": {
+              "tx_params": conf.txParams,
+              "ladder_specs": conf.ladderSpecs,
+              "description": "Lorem ipsum dolor sit amet",
+              "ingest_type": conf.ingestType,
+              "max_duration_sec": conf.maxDurationSec,
+              "part_ttl": conf.partTTL,
+              "rtmp_url": conf.rtmpURL,
+              "listen": conf.listen,
+              "name": "Live Test - " + Date().toLocaleString(),
+              "origin_url": conf.originUrl,
+              "playout_type" : "live",
+              "source_timescale": conf.sourceTimescale,
+              "udp_port": conf.udpPort,
+              "simple_watermark": conf.simpleWatermark,
+            },
+            "recording_start_time": conf.recordingStartTime,
+            "recording_stop_time": conf.recordingStopTime,
+          },
+          "playout_config": conf.playoutConfig,
+        }
       }
     })
 
@@ -466,6 +480,17 @@ const Test = async () => {
 
 
 const StartStream = async () => {
+
+  let confLocal = {
+    clientConf: {
+      contentSpaceId: "ispc36s3uwY9voTx6gXcXENn4KfY29fC",
+      fabricURIs: ["http://192.168.90.202:8009"],
+      ethereumURIs: ["http://192.168.90.202:8546"],
+    },
+    libraryId: "ilib8SLzhEyJWiJ41BPezhswG56MUwL",
+    objectId: "iq__2PfnTvyYuVm84y1Qie8YHAC42eGN",
+    signerPrivateKey: process.env.PRIVATE_KEY,
+  }
 
   let confDemoV3 = {
 	clientConf: {
@@ -601,6 +626,17 @@ const StartStream = async () => {
 
 const ConfigStream = async () => {
 
+  let confLocal = {
+    clientConf: {
+      contentSpaceId: "ispc36s3uwY9voTx6gXcXENn4KfY29fC",
+      fabricURIs: ["http://192.168.90.202:8009"],
+      ethereumURIs: ["http://192.168.90.202:8546"],
+    },
+    libraryId: "ilib8SLzhEyJWiJ41BPezhswG56MUwL",
+    objectId: "iq__3ywfX6kmVBVhGmvBtvrc1Yw3QnU5",
+    signerPrivateKey: process.env.PRIVATE_KEY,
+  }
+
   let confDemoV3 = {
 	clientConf: {
 	  contentSpaceId: "ispc3ANoVSzNA3P6t7abLR69ho5YPPZU",
@@ -636,7 +672,7 @@ const ConfigStream = async () => {
 	signerPrivateKey: process.env.PRIVATE_KEY,
   }
 
-  let conf = confDemoV3;
+  let conf = confLocal;
 
   try {
     let client
@@ -663,7 +699,7 @@ const ConfigStream = async () => {
     })
     //console.log("Main meta:", mainMeta)
 
-	edgeWriteToken = mainMeta.edge_write_token;
+	edgeWriteToken = mainMeta.live_recording.fabric_config.edge_write_token;
 
     let edgeMeta = await client.ContentObjectMetadata({
       libraryId: conf.libraryId,
@@ -672,12 +708,13 @@ const ConfigStream = async () => {
     })
     //console.log("Edge meta:", edgeMeta)
 
-	console.log("CONFIG: ", edgeMeta.live_recording_parameters.live_playout_config);
-	console.log("recording_start_time: ", edgeMeta.recording_start_time);
-	console.log("recording_stop_time:  ", edgeMeta.recording_stop_time);
+	console.log("CONFIG: ", edgeMeta.live_recording.playout_config);
+	console.log("recording_start_time: ", edgeMeta.live_recording.recording_config.recording_start_time);
+	console.log("recording_stop_time:  ", edgeMeta.live_recording.recording_config.recording_stop_time);
 
 	// Set rebroadcast start
-	edgeMeta.live_recording_parameters.live_playout_config.rebroadcast_start_time_sec_epoch = 1619558151;
+    edgeMeta.live_recording.playout_config.rebroadcast_start_time_sec_epoch = 1620270245;
+    edgeMeta.live_recording.recording_config.recording_stop_time = 1620270245;
 
     if (PRINT_DEBUG) console.log("MergeMetadata", conf.libraryId, conf.objectId, writeToken)
     await client.MergeMetadata({
@@ -685,10 +722,15 @@ const ConfigStream = async () => {
       objectId: conf.objectId,
       writeToken: edgeWriteToken,
       metadata: {
-        "live_recording_parameters": {
-		  "live_playout_config" : edgeMeta.live_recording_parameters.live_playout_config
-		}
-	  }
+        "live_recording": {
+          "recording_config": {
+            "recording_stop_time": edgeMeta.live_recording.recording_config.recording_stop_time
+          },
+          "playout_config": {
+            "rebroadcast_start_time_sec_epoch" : edgeMeta.live_recording.playout_config.rebroadcast_start_time_sec_epoch
+          }
+        }
+      }
     });
 
   } catch (error) {
@@ -702,7 +744,7 @@ function sleep(ms) {
   })
 }
 
-//Test()
+Test()
 
 //StartStream()
-ConfigStream()
+//ConfigStream()
