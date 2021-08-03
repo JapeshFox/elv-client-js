@@ -17,6 +17,8 @@ const {
   ValidateParameters,
 } = require("../Validation");
 
+const MergeWith = require("lodash/mergeWith");
+
 
 // Note: Keep these ordered by most-restrictive to least-restrictive
 exports.permissionLevels = {
@@ -840,21 +842,24 @@ exports.ContentObjectMetadata = async function({
        Subtree: ${metadataSubtree}`
   );
 
+  queryParams = { ...(queryParams || {}) };
+
   if(versionHash) { objectId = this.utils.DecodeVersionHash(versionHash).objectId; }
 
   let path = UrlJoin("q", writeToken || versionHash || objectId, "meta", metadataSubtree);
 
   // Main authorization
-  let authToken = await this.MetadataAuth({libraryId, objectId, versionHash, path: metadataSubtree});
+  let defaultAuthToken = await this.MetadataAuth({libraryId, objectId, versionHash, path: metadataSubtree});
 
-  // Additional authorization
-  queryParams.authorization = [queryParams.authorization, authorizationToken].flat().filter(token => token);
+  // All authorization
+  const authTokens = [authorizationToken, queryParams.authorization, defaultAuthToken].flat().filter(token => token);
+  delete queryParams.authorization;
 
   let metadata;
   try {
     metadata = await this.utils.ResponseToJson(
       this.HttpClient.Request({
-        headers: { "Authorization": `Bearer ${authToken}` },
+        headers: { "Authorization": authTokens.map(token => `Bearer ${token}`) },
         queryParams: {
           ...queryParams,
           select,
@@ -943,39 +948,15 @@ exports.AssetMetadata = async function({libraryId, objectId, versionHash, metada
     metadata.info = {};
   }
 
+  let mergedMetadata = { ...metadata };
   if(localization) {
     localization.reverse().forEach(keys => {
-      const overrides = this.utils.SafeTraverse(metadata, ...keys);
-
-      if(!overrides) { return; }
-
-      Object.keys(overrides).forEach(overrideKey => {
-        if(overrideKey === "info") {
-          Object.keys(overrides.info).forEach(infoOverrideKey => {
-            const value = overrides.info[infoOverrideKey];
-            if(
-              (typeof value === "object" && Object.keys(value).length === 0) ||
-              (Array.isArray(value) && value.length === 0)
-            ) { return; }
-
-            metadata.info[infoOverrideKey] = value;
-          });
-        } else {
-          const value = overrides[overrideKey];
-          if(
-            (typeof value === "object" && Object.keys(value).length === 0) ||
-            (Array.isArray(value) && value.length === 0)
-          ) { return; }
-
-          metadata[overrideKey] = value;
-        }
-      });
-
-      //delete metadata[keys[0]];
+      const localizedMetadata = this.utils.SafeTraverse(metadata, ...keys) || {};
+      mergedMetadata = MergeWith({}, mergedMetadata, localizedMetadata, (a, b) => b === null || b === "" ? a : undefined);
     });
   }
 
-  return metadata;
+  return mergedMetadata;
 };
 
 /**
@@ -1479,6 +1460,19 @@ exports.PlayoutOptions = async function({
         }
       }
     };
+
+    // Add .cert_url if playoutMap[protocol].playoutMethods[].drms[].cert is present
+    // (for clients that need cert supplied as a URL reference rather than as a string literal)
+    for(const method in playoutMap[protocol].playoutMethods) {
+      if(playoutMap[protocol].playoutMethods[method].drms &&
+        playoutMap[protocol].playoutMethods[method].drms[drm] &&
+        playoutMap[protocol].playoutMethods[method].drms[drm].cert) {
+        // construct by replacing last part of playout URL path (e.g. "playlist.m3u8", "live.m3u8") with "drm.cert"
+        let certUrl = new URL(playoutMap[protocol].playoutMethods[method].playoutUrl);
+        certUrl.pathname = certUrl.pathname.split("/").slice(0,-1).concat(["drm.cert"]).join("/");
+        playoutMap[protocol].playoutMethods[method].drms[drm].cert_url = certUrl.toString();
+      }
+    }
 
     // Exclude any options that do not satisfy the specified protocols and/or DRMs
     const protocolMatch = protocols.includes(protocol);
@@ -2698,7 +2692,7 @@ exports.Collection = async function({collectionType}) {
 
   this.Log(`Retrieving ${collectionType} contract collection for user ${this.signer.address}`);
 
-  return await this.ethClient.MakeProviderCall({
+  return (await this.ethClient.MakeProviderCall({
     methodName: "send",
     args: [
       "elv_getWalletCollection",
@@ -2708,7 +2702,7 @@ exports.Collection = async function({collectionType}) {
         collectionType
       ]
     ]
-  });
+  })) || [];
 };
 
 
